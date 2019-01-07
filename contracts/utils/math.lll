@@ -1,0 +1,21 @@
+{
+    (def 'mresult 0xf0)
+
+    (def 'is-unsigned (a) (when (< a 0) revert))
+
+    (def 'add-safe (a b) {
+        (is-unsigned a)
+        (is-unsigned b)
+        (mstore mresult (+ a b))
+        (when (< @mresult a) revert)
+        @mresult
+    })
+
+    (def 'sub-safe (a b) {
+        (is-unsigned a)
+        (is-unsigned b)
+        (mstore mresult (- a b))
+        (when (> @mresult a) revert)
+        @mresult
+    })
+}

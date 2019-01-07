@@ -1,0 +1,286 @@
+{
+  "contractName": "IStore",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "_transfered",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.5.0;\n\ninterface IStore {\n    function _transfered(address, uint) external;\n}",
+  "sourcePath": "/Users/aroncastrocoelho/projects/comedy/contracts/interfaces/IStore.sol",
+  "ast": {
+    "absolutePath": "/Users/aroncastrocoelho/projects/comedy/contracts/interfaces/IStore.sol",
+    "exportedSymbols": {
+      "IStore": [
+        605
+      ]
+    },
+    "id": 606,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 597,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:4"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 605,
+        "linearizedBaseContracts": [
+          605
+        ],
+        "name": "IStore",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 604,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_transfered",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 602,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 599,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 604,
+                  "src": "69:7:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 598,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "69:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 601,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 604,
+                  "src": "78:4:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 600,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "78:4:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "68:15:4"
+            },
+            "returnParameters": {
+              "id": 603,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "92:0:4"
+            },
+            "scope": 605,
+            "src": "48:45:4",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 606,
+        "src": "25:70:4"
+      }
+    ],
+    "src": "0:95:4"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/aroncastrocoelho/projects/comedy/contracts/interfaces/IStore.sol",
+    "exportedSymbols": {
+      "IStore": [
+        605
+      ]
+    },
+    "id": 606,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 597,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:4"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 605,
+        "linearizedBaseContracts": [
+          605
+        ],
+        "name": "IStore",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 604,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_transfered",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 602,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 599,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 604,
+                  "src": "69:7:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 598,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "69:7:4",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 601,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 604,
+                  "src": "78:4:4",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 600,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "78:4:4",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "68:15:4"
+            },
+            "returnParameters": {
+              "id": 603,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "92:0:4"
+            },
+            "scope": 605,
+            "src": "48:45:4",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 606,
+        "src": "25:70:4"
+      }
+    ],
+    "src": "0:95:4"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.0+commit.1d4f565a.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.0",
+  "updatedAt": "2019-01-06T14:03:54.204Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}

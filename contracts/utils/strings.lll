@@ -1,0 +1,27 @@
+{   ; String Solidity
+
+    ; Memory Layout
+    (def 'i 0x80)
+    (def 'j 0xa0)
+
+    (def 'get-string-size (length) (& (+ length 0x5f) (~ 0x1f)))
+
+    (def 'lstring (mem offset loc length) { ; load storage string
+        (mstore mem (+ 0x20 (- mem offset)))
+        (mstore (+ mem 0x20) length)
+        (mstore j (+ mem 0x40))
+        (for
+            (mstore i 0)
+            (< (* @i 32) length)
+            (mstore i (+ @i 0x01))
+            (mstore (+ @j (* @i 0x20)) @@(+ @i loc)))
+    })
+
+    (def 'sstring (sstart start length) ; save string in storage
+        (for
+            {(mstore i length) (mstore j 0)}
+            (>= @i 0x20)
+            {(mstore i (- @i 0x20)) (mstore j (+ @j 1))}
+            (sstore (+ sstart @j) @(+ start (* @j 0x20))))
+    )
+}

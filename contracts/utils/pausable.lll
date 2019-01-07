@@ -1,0 +1,8 @@
+{
+    ; Pausable Modifiers
+    (def 'ptr-paused 0x10)
+    (def 'paused @@ptr-paused)
+    (def 'when-not-paused
+        (when (= paused 1) revert))
+    (def 'set-paused (value) (sstore ptr-paused value))
+}

@@ -1,0 +1,149 @@
+{   ; contract Joke
+
+    (include "utils/macros.lll")
+    (include "utils/owner.lll")
+    (include "utils/strings.lll")
+    (include "utils/math.lll")
+    (include "utils/pausable.lll")
+    (include "utils/upgradable.lll")
+
+    ; Contract version
+    (def 'version 1)
+
+    ; Arguments
+    (def 'arg1 0x04)
+
+    ; Memory Layout
+    (def 'cursor 0x20)
+    (def 'id 0x40)
+    (def 'header 0x60) ; get header
+    (def 'string 0xc0)
+
+    ; Memory Return Data
+    (def 'mversion 0xe0)
+    (def 'mlength 0x100)
+    (def 'mtimestamp 0x120)
+    (def 'mlikes 0x140)
+    (def 'mowner 0x160)
+    (def 'mbody 0x180)
+
+    ; Jokes
+    (def 'rmin-data 0x100)
+    (def 'jokes @cursor)
+    (def 'joke-cursor (i) {
+        (mstore id i)
+        (mstore cursor (keccak256 id 0x20))})
+
+    ; Storage
+    (def 'jokes-count 0x01)
+    (def 'joke-add (old value) 
+        (sstore jokes-count (add-safe old value)))
+
+    ; Events
+    (def 'event-create
+        0xcc9018de05b5f497ee7618d8830568d8ac2d45d0671b73d8f71c67e824122ec7) ; Create(address,uint256)
+
+    ; Functions IDS
+    (def 'create-joke 0xb6a46b3b) ; create(string)
+    (def 'get-joke 0x79bfe0e4) ; joke(uint256)
+    (def 'get-length 0x1f7b6d32) ; length()
+    (def 'set-pause 0x07da68f5) ; stop()
+    (def 'set-upgrade 0x976031d4) ; setUpgrade(address)
+
+    ; Struct Joke
+    ; header offsets
+    (def 'joke-version 0) ; uint8
+    (def 'joke-length 8) ; uint32
+    (def 'joke-timestamp 40) ; uint64
+    (def 'joke-likes 104) ; uint64
+
+    ; properties index
+    (def 'joke-header 0) ; uint256
+    (def 'joke-owner 1) ; address
+    (def 'joke-body 2) ; string
+
+    ; Set Header
+    (def 'set-joke-header (length time likes) 
+        (sstore jokes (or
+            (or (shl version joke-version)
+                (shl length joke-length))
+            (or (shl time joke-timestamp)
+                (shl likes joke-likes)))))
+
+    ; Set Owner
+    (def 'set-joke-owner (value)
+        (sstore (+ jokes joke-owner) value))
+    
+    ; Set Body
+    (def 'set-joke-body (mstart mend)
+        (sstring (+ jokes joke-body) mstart mend))
+    
+    ; Get Header
+    (def 'get-joke-header (mem data offset mask)
+        (mstore mem (and (shr data offset) mask)))
+
+    ; Get Owner
+    (def 'get-joke-owner (ptr)
+        (mstore ptr @@(+ jokes joke-owner)))
+    
+    ; Get Body
+    (def 'get-joke-body (mem offset length)
+        (lstring mem offset (+ jokes joke-body) length))
+
+    ; Constructor
+    not-payable
+    (set-owner (caller))
+    (joke-add 0 0)
+
+    (returnlll { execute-upgradable
+                 not-payable
+                 when-not-paused
+                 uses-function
+
+        (function get-joke { has-one-arg
+            (joke-cursor $0x04)
+            (mstore header (sload jokes))
+
+            (get-joke-header mversion @header joke-version mask-1)
+            (get-joke-header mlength @header joke-length mask-4)
+            (get-joke-header mtimestamp @header joke-timestamp mask-8)
+            (get-joke-header mlikes @header joke-likes mask-8)
+            (get-joke-owner mowner)
+            (get-joke-body mbody mversion @mlength)
+
+            (return mversion (+ 160 (get-string-size @mlength)))
+        })
+
+        (function get-length {
+            (mstore call-result @@jokes-count)
+            (return call-result 0x20)
+        })
+
+        (function create-joke {
+            (mstore header (- (calldatasize) 0x44))
+            (calldatacopy string 0x44 @header)
+
+            (joke-cursor @@jokes-count)
+            (set-joke-header $0x24 (timestamp) 0)
+            (set-joke-owner (caller))
+            (set-joke-body string @header)
+            (joke-add @id 1)
+
+            (mstore call-result @id)
+            (events2 event-create (caller))
+            (return call-result 0x20)
+        })
+
+        (function set-pause { only-owner has-one-arg
+            (set-paused 1)
+            (stop)
+        })
+
+        (function set-upgrade { only-owner has-one-arg
+            (set-contract-upgrade $0x04)
+            (stop)
+        })
+
+        (jump invalid-location)
+    })
+}

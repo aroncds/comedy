@@ -1,0 +1,110 @@
+{
+  "contractName": "Joke",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "body",
+          "type": "string"
+        }
+      ],
+      "name": "create",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function",
+      "signature": "0xb6a46b3b"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "length",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "payable": false,
+      "type": "function",
+      "signature": "0x1f7b6d32"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "joke",
+      "outputs": [
+        {
+          "name": "version",
+          "type": "uint256"
+        },
+        {
+          "name": "length",
+          "type": "uint256"
+        },
+        {
+          "name": "timestamp",
+          "type": "uint256"
+        },
+        {
+          "name": "likes",
+          "type": "uint256"
+        },
+        {
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "name": "body",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function",
+      "signature": "0x79bfe0e4"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "name": "Create",
+      "type": "event",
+      "signature": "0xcc9018de05b5f497ee7618d8830568d8ac2d45d0671b73d8f71c67e824122ec7"
+    }
+  ],
+  "bytecode": "0x341561000a57600080fd5b33600055600060f05260f051600155610290806100286000396000f3fe6040541561002557366060600037602061016036606060405460155a03f4506020610160f35b341561003057600080fd5b6001601054141561004057600080fd5b6000808052600490601c376379bfe0e4600051141561012c573660241461006657600080fd5b600435808052602090819020908190528054606081905260ff811660e05261010080820463ffffffff169081905265010000000000820467ffffffffffffffff908116610120526d0100000000000000000000000000909204909116610140526001909101546101605260c0610180526101a0526101c060a05260006080525b61010051602060805102101561011a57600260205101608051015460206080510260a05101526001608051016080526100e6565b601f19605f61010051011660a00160e0f35b631f7b6d3260005114156101465760015460405260206040f35b63b6a46b3b600051141561022b5760443603606052606051604460c0376001805460409081526020908190209081905260243561010002426501000000000002178217815533910155606051608052600060a0525b6080516020116101d157602060a0510260c0015160a0516002602051010155602060805103608052600160a0510160a05261019b565b600060405110156101e157600080fd5b6040516001810160f081905210156101f857600080fd5b60f051600155337fcc9018de05b5f497ee7618d8830568d8ac2d45d0671b73d8f71c67e824122ec760206040a260206040f35b6307da68f5600051141561025b57600054331461024757600080fd5b3660241461025457600080fd5b6001601055005b63976031d4600051141561028c57600054331461027757600080fd5b3660241461028457600080fd5b600435604055005b600256",
+  "networks": {
+    "1546809118932": {
+      "events": {},
+      "links": {},
+      "address": "0x20A2137D4F1b444AC88D91B285031D9ecB2BDDaa",
+      "transactionHash": "0xf44e81d42fbeed86baf891b760b9403f6f762e70759623500f67995ceb927320"
+    },
+    "1546883421683": {
+      "events": {},
+      "links": {},
+      "address": "0x99A74D9a0238bfa4aDc8c26b4485530Dda1437C8",
+      "transactionHash": "0x1108c630169f8a9682ca2cbdf9209ee2176d30a80f5b88647d992e5878adc8e9"
+    }
+  },
+  "schemaVersion": "3.0.0",
+  "updatedAt": "2019-01-07T17:54:00.732Z"
+}

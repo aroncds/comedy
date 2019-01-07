@@ -1,0 +1,36 @@
+{
+    (def 'mem-func 0x00)
+    (def 'call-result 0x40)
+
+    (def 'revert (revert 0 0))
+
+    (def 'invalid-location 0x02)
+
+    (def 'uses-function {
+        (mstore mem-func 0)
+        (calldatacopy (+ mem-func 28) 0x00 0x04)
+    })
+
+    (def 'function (function-hash code-body)
+        (when (= @mem-func function-hash) code-body))
+
+    (def 'not-payable
+        (when (callvalue) revert))
+
+    (def 'payable
+        (unless (callvalue) revert))
+
+    (def 'is-address (addr)
+        (when (shr address 160) revert))
+    
+    (def 'events2 (event arg1) 
+        (log2 call-result 32 event arg1))
+
+    (def 'has-one-arg
+        (unless (= 0x24 (calldatasize)) revert))
+
+    (def 'mask-1 0xff)
+    (def 'mask-4 0xffffffff)
+    (def 'mask-8 0xffffffffffffffff)
+    (def 'mask (value) (- (exp 2 value) 1))
+}
