@@ -40,14 +40,14 @@
         (sstore jokes-count (add-safe old value)))
 
     ; Events
-    (def 'event-create
+    (def 'create-event
         0xcc9018de05b5f497ee7618d8830568d8ac2d45d0671b73d8f71c67e824122ec7) ; Create(address,uint256)
 
     ; Functions IDS
     (def 'create-joke 0xb6a46b3b) ; create(string)
     (def 'get-joke 0x79bfe0e4) ; joke(uint256)
     (def 'get-length 0x1f7b6d32) ; length()
-    (def 'set-pause 0x07da68f5) ; stop()
+    (def 'set-pause 0xbedb86fb) ; setPause(bool)
     (def 'set-upgrade 0x976031d4) ; setUpgrade(address)
 
     ; Struct Joke
@@ -95,13 +95,13 @@
     (set-owner (caller))
     (joke-add 0 0)
 
-    (returnlll { execute-upgradable
-                 not-payable
+    (returnlll { not-payable
                  when-not-paused
                  uses-function
 
+        (def 'index $0x04)
         (function get-joke { has-one-arg
-            (joke-cursor $0x04)
+            (joke-cursor index)
             (mstore header (sload jokes))
 
             (get-joke-header mversion @header joke-version mask-1)
@@ -119,7 +119,8 @@
             (return call-result 0x20)
         })
 
-        (function create-joke {
+        (def 'body $0x04)
+        (function create-joke { execute-upgradable
             (mstore header (- (calldatasize) 0x44))
             (calldatacopy string 0x44 @header)
 
@@ -130,17 +131,19 @@
             (joke-add @id 1)
 
             (mstore call-result @id)
-            (events2 event-create (caller))
+            (events2 create-event (caller))
             (return call-result 0x20)
         })
 
+        (def 'value $0x04)
         (function set-pause { only-owner has-one-arg
-            (set-paused 1)
+            (set-paused value)
             (stop)
         })
 
+        (def 'address $0x04)
         (function set-upgrade { only-owner has-one-arg
-            (set-contract-upgrade $0x04)
+            (set-contract-upgrade address)
             (stop)
         })
 

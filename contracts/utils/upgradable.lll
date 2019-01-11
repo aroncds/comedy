@@ -1,16 +1,14 @@
 {
     ; Upgradable contract
-
-    (def 'tmp-data 0x060)
-    (def 'delegate-result 0x0160)
-    (def 'contract 0x040)
-    (def 'current-contract @@contract)
+    (def 'delegate-result 0x00)
+    (def 'contract 0x04)
     (def 'set-contract-upgrade (address) (sstore contract address))
 
     (def 'execute-upgradable
-        (unless (= current-contract 0x00) {
-            (calldatacopy 0 tmp-data (calldatasize))
-            (delegatecall allgas current-contract tmp-data (calldatasize) delegate-result 32)
+        (mstore 0x0 @@contract)
+        (unless (= @0x0 0x0) {
+            (calldatacopy 0 0x20 (calldatasize))
+            (delegatecall allgas @0x0 0x20 (calldatasize) delegate-result 32)
             (return delegate-result 32)
         }))
 }

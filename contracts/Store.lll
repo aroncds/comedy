@@ -4,6 +4,10 @@
     (include "utils/owner.lll")
     (include "utils/math.lll")
 
+    ; ENUM TokenType
+    (def 'Ether 0x01)
+    (def 'Token 0x02)
+
     ; Storage layout
     (def 'owner 0x00)
     (def 'token 0x01)
@@ -24,8 +28,7 @@
 
     ; Functions ids
     (def 'buy 0xa6f2ae3a) ; buy()
-    (def 'withdraw-ether 0x7362377b) ; withdrawEther()
-    (def 'withdraw-token 0x50baa622) ; withdrawToken(uint256)
+    (def 'withdraw 0x7362377b) ; withdraw(uint256,uint256)
     (def 'transfered 0x093f4320) ; _transfered(address,uint256)
 
     ; Token Function Ids
@@ -69,6 +72,36 @@
     
     (def 'when-not-paused (when (~ @@paused) revert))
 
+    ; internal functions
+    (def 'withdraw-ether {
+        (mstore scratch0 @@(unitsToPay (caller)))
+        (when (< @scratch0 get-sell-min) revert)
+        (when (< (balance (address)) 0) revert)
+        (mstore scratch1 (* @scratch0 get-sell-price))
+        
+        (if (S< (balance (caller)) @scratch1)
+            (sstore (unitsToPay (caller)) 0)
+            {
+                (mstore scratch1 (- @scratch1 (balance (address))))
+                (sstore (unitsToPay (caller)) (- @@(unitsToPay (caller)) @scratch1))
+            })
+        
+        (send (caller) @scratch1)
+        (mstore call-result @scratch1)
+        (events2 withdraw-event (caller))
+    })
+
+    (def 'withdraw-token {
+        (mstore scratch0 (unitsToPay (caller)))
+        (mstore scratch1 $0x04)
+        (when (< @scratch1 @scratch0) revert)
+        (sstore (unitsToPay (caller)) (- @scratch0 @scratch1))
+        (transfer-token (caller) @scratch1)
+        (mstore call-result @scratch1)
+        (events2 withdraw-event (caller))
+    })
+
+    ; Constructor
     (set-owner (caller))
     (set-token $0x00)
     (set-buy 100 100000000000000)
@@ -84,38 +117,19 @@
             (events2 buy-event (caller))
         })
 
-        (function withdraw-ether { not-payable
-            (mstore scratch0 @@(unitsToPay (caller)))
-            (when (< @scratch0 get-sell-min) revert)
-            (when (< (balance (address)) 0) revert)
-            (mstore scratch1 (* @scratch0 get-sell-price))
-            
-            (if (S< (balance (caller)) @scratch1)
-                (sstore (unitsToPay (caller)) 0)
-                {
-                    (mstore scratch1 (- @scratch1 (balance (address))))
-                    (sstore (unitsToPay (caller)) (- @@(unitsToPay (caller)) @scratch1))
-                })
-            
-            (send (caller) @scratch1)
-            (mstore call-result @scratch1)
-            (events2 withdraw-event (caller))
+        (def 'type $0x04)
+        (def 'units $0x24)
+        (function withdraw {
+            (if (S= type Ether)
+                withdraw-ether
+                (when (= type Token)
+                withdraw-token))
         })
 
-        (function withdraw-token { has-one-arg not-payable
-            (mstore scratch0 (unitsToPay (caller)))
-            (mstore scratch1 $0x04)
-            (when (< @scratch1 @scratch0) revert)
-            (sstore (unitsToPay (caller)) (- @scratch0 @scratch1))
-            (transfer-token (caller) @scratch1)
-            (mstore call-result @scratch1)
-            (events2 withdraw-event (caller))
-        })
-
+        (def 'to $0x04)
+        (def 'value $0x24)
         (function transfered { is-token-sender
-            (mstore scratch0 $0x04)
-            (mstore scratch1 $0x24)
-            (sstore (unitsToPay @scratch0) (+ @@(unitsToPay @scratch0) @scratch1))
+            (sstore (unitsToPay to) (+ @@(unitsToPay to) value))
         })
 
         not-payable

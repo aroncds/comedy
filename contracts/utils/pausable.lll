@@ -1,6 +1,6 @@
 {
     ; Pausable Modifiers
-    (def 'ptr-paused 0x10)
+    (def 'ptr-paused 0x03)
     (def 'paused @@ptr-paused)
     (def 'when-not-paused
         (when (= paused 1) revert))

@@ -1,8 +1,7 @@
 {
     ; Owner modifiers
     (def 'owner 0x00) ; address
-    (def 'get-owner @@owner)
-    (def 'set-owner (address) (sstore 0x00 address))
+    (def 'set-owner (address) (sstore owner address))
     (def 'only-owner
-        (unless (= (caller) get-owner) revert))
+        (unless (= (caller) @@owner) revert))
 }

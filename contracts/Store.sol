@@ -1,15 +1,15 @@
 pragma solidity ^0.5.0;
 
+import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "./interfaces/IStore.sol";
-import "./Token.sol";
 
 
 contract Store is Ownable, IStore {
     using SafeMath for uint256;
 
-    Token public token;
+    IERC20 public token;
 
     uint128 public buyMin = 100;
     uint128 public withdrawMin = 150;
@@ -17,20 +17,26 @@ contract Store is Ownable, IStore {
     uint256 public buyPrice = 0.0001 ether;
     uint256 public sellPrice = 0.00008 ether;
 
+    uint256 private comissionValue = 0.00002 ether;
+    uint256 private comission = 0;
+
     bool public paused = false;
 
-    mapping(address=>uint256) private unitsToPay;
-    mapping(address=>bool) private lock;
+    mapping(address=>uint256) public etherToPay;
 
     event Buy(address indexed owner, uint256 value);
     event Sell(address indexed owner, uint256 value);
-    event Transfered(address indexed owner, uint256 value);
     event Withdraw(address indexed target, uint256 sended);
-    event ChangeBuyPrice(uint256 value);
-    event ChangeSellPrice(uint256 value);
+    event BuyPrice(uint256 value);
+    event SellPrice(uint256 value);
 
     modifier whenNotPaused {
         require(!paused, "paused");
+        _;
+    }
+
+    modifier whenPaused {
+        require(paused, "not-paused");
         _;
     }
 
@@ -39,14 +45,15 @@ contract Store is Ownable, IStore {
         _;
     }
 
-    constructor() public Ownable() {
-        token = new Token(address(this));
+    constructor(address _token) public Ownable() {
+        token = IERC20(_token);
     }
 
     function buy()
         public
         payable
         whenNotPaused
+        returns(bool)
     {
         uint256 units = uint(msg.value).div(buyPrice);
         require(units >= buyMin, "min-units");
@@ -54,61 +61,61 @@ contract Store is Ownable, IStore {
         token.transfer(msg.sender, units);
 
         emit Buy(msg.sender, units);
+
+        return true;
     }
 
-    function _transfered(address target, uint256 value)
-        external
-        isTokenSender
-    {
-        uint256 _units = unitsToPay[target];
-        unitsToPay[target] = _units.add(value);
-        emit Transfered(target, value);
-    }
-
-    function withdrawEther()
+    function sell(uint256 units)
         public
         whenNotPaused
-        returns(uint256)
+        returns(bool)
     {
-        uint256 _unitsToPay = unitsToPay[msg.sender];
-        require(_unitsToPay >= withdrawMin, "withdraw-min");
+        uint256 balance = token.allowance(msg.sender, address(this));
+        require(balance >= units, "units-indisponible");
 
-        uint256 balance = address(this).balance;
-        require(balance > 0, "balance-insuficient");
-    
-        uint256 etherToPay = _unitsToPay.mul(sellPrice);
-        
-        if (balance >= etherToPay){
-            unitsToPay[msg.sender] = 0;
-        }else{
-            etherToPay = etherToPay.sub(balance);
-            unitsToPay[msg.sender] = _unitsToPay.sub(etherToPay.div(sellPrice));
-        }
-    
-        msg.sender.transfer(etherToPay);
+        require(
+            token.transferFrom(msg.sender, address(this), units),
+            "transfer-failed");
 
-        emit Withdraw(msg.sender, etherToPay);
+        etherToPay[msg.sender] = sellPrice.mul(units);
+        comission = comissionValue.mul(units);
 
-        return etherToPay;
+        emit Sell(msg.sender, etherToPay[msg.sender]);
+
+        return true;
     }
 
-    function withdrawToken(uint units) public {
-        uint256 _unitsToPay = unitsToPay[msg.sender];
-        require(units <= _unitsToPay, "units-incorrect");
-        _unitsToPay = _unitsToPay.sub(units);
-        unitsToPay[msg.sender] = _unitsToPay;
-        token.transfer(msg.sender, _unitsToPay);
+    function withdraw()
+        public
+        whenNotPaused
+        returns(bool)
+    {
+        uint256 ethers = etherToPay[msg.sender];
+        require(address(this).balance >= ethers, "balance-down");
+        etherToPay[msg.sender] = 0;
+        msg.sender.transfer(ethers);
 
-        emit Withdraw(msg.sender, _unitsToPay);
-    } 
+        emit Withdraw(msg.sender, ethers);
+        
+        return true;
+    }
 
-    function changeBuyPrice(uint256 value)
+    function setBuyPrice(uint256 value)
         public
         onlyOwner
+        whenPaused
     {
-        require(paused, "not-paused");
         buyPrice = value;
-        emit ChangeBuyPrice(buyPrice);
+        emit BuyPrice(value);
+    }
+
+    function setSellPrice(uint256 value)
+        public
+        onlyOwner
+        whenPaused
+    {
+        sellPrice = value;
+        emit SellPrice(value);
     }
 
     function setPause(bool value)
@@ -116,10 +123,6 @@ contract Store is Ownable, IStore {
         onlyOwner
     {
         paused = value;
-    }
-
-    function getUnits() public view returns (uint256){
-        return unitsToPay[msg.sender];
     }
 
     function kill(address payable update)
