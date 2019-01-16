@@ -4,39 +4,56 @@
     (include "utils/owner.lll")
     (include "utils/math.lll")
 
-    ; ENUM TokenType
-    (def 'Ether 0x01)
-    (def 'Token 0x02)
-
     ; Storage layout
     (def 'owner 0x00)
     (def 'token 0x01)
-    (def 'buy 0x02)
-    (def 'sell 0x03)
-    (def 'paused 0x04)
-    (def 'unitsToPay (address) address)
+    (def 'wallet 0x02)
+    (def 'buy 0x03)
+    (def 'sell 0x04)
+    (def 'paused 0x05)
+    (def 'etherToPay (address) address)
 
     ; Memory Layout
     (def 'call-func 0x00)
-    (def 'call-data 0x20)
-    (def 'call-data1 0x40)
-    (def 'call-result 0x40)
+    (def 'call-data 0x04)
+    (def 'call-data1 0x24)
+    (def 'call-data2 0x44)
+    (def 'call-result 0x00)
 
     ; Scratch
     (def 'scratch0 0x60)
     (def 'scratch1 0x80)
 
+    ; Arguments
+    (def 'arg1 0x04)
+    (def 'arg2 0x24)
+    (def 'arg3 0x44)
+
     ; Functions ids
     (def 'buy 0xa6f2ae3a) ; buy()
-    (def 'withdraw 0x7362377b) ; withdraw(uint256,uint256)
-    (def 'transfered 0x093f4320) ; _transfered(address,uint256)
+    (def 'sell 0xe4849b32) ; sell(uint256)
+    (def 'withdraw 0x3ccfd60b) ; withdraw()
+    (def 'kill 0xcbf0b0c0) ; kill(address)
+
+    (def 'set-wallet-id 0xdeaa59df) ; setWallet(address)
+    (def 'set-token-id 0x144fa6d7) ; setToken(address)
+    (def 'set-buy-price-id 0x63ae8d6c) ; setBuyPrice(uint256)
+    (def 'set-sell-price-id 0xfc6634b9) ; setSellPrice(uint256)
+    (def 'set-pause-id 0xbedb86fb) ; setPause(bool)
 
     ; Token Function Ids
-    (def 'transfer-id 0xa9059cbb)
+    (def 'balance-of-id 0x70a08231) ; balanceOf(address)
+    (def 'transfer-from-id 0x23b872dd) ; transferFrom(address,address,uint256)
+
+    ; Wallet Function Ids
+    (def 'capture-tokens-id 0xcbf27cdd) ; captureTokens(address,uint256)
+    (def 'send-ether-id 0xc1756a2c) ; sendEther(address,uint256)
 
     ; Events
     (def 'buy-event ; Buy(address,uint256)
         0xe3d4187f6ca4248660cc0ac8b8056515bac4a8132be2eca31d6d0cc170722a7e)
+    (def 'sell-event ; Sell(address,uint256)
+        0x5e5e995ce3133561afceaa51a9a154d5db228cd7525d34df5185582c18d3df09)
     (def 'withdraw-event ; Withdraw(adress,uint256)
         0x85017931eb9da51c61da7d7ab740bc6b9410c6ac198ca51ef8a351b2f134f668)
     
@@ -53,53 +70,49 @@
     (def 'get-sell-price (and @@sell (mask 128)))
     
     (def 'set-token (address) (sstore token address))
+    (def 'set-wallet (address) (sstore wallet address))
 
-    (def 'transfer-token (address amount) {
-        ;(mstore call-func transfer-id)
-        (mstore call-data address)
-        (mstore call-data1 amount)
-        (call allgas @@token 0 call-data 0x40 call-result 0x20)
+    (def 'set-pause (value) (sstore paused value))
+
+    ; Token Functions
+    (def 'token-transfer-from (from to amount) {
+        (mstore call-func transfer-from-id)
+        (mstore call-data from)
+        (mstore call-data1 to)
+        (mstore call-data2 amount)
+        (call allgas @@token 0 call-data 0x64 call-result 0x20)
+        (unless @call-result revert)
     })
 
-    (def 'balance-of (address) {
+    (def 'token-balance-of (address) {
+        (mstore call-func balance-of-id)
         (mstore call-data address)
         (staticcall allgas @@token call-data 0x20 call-result 0x20)
-        (mload call-result)
+        @call-result
+    })
+
+    ; Wallet Functions
+    (def 'wallet-capture-tokens (address units) {
+        (mstore call-func capture-tokens-id)
+        (mstore call-data address)
+        (mstore call-data1 units)
+        (call allgas @@wallet 0 call-data 0x44 call-result 0x20)
+        (unless @call-result revert)
+    })
+
+    (def 'wallet-send-ether (address units) {
+        (mstore call-func send-ether-id)
+        (mstore call-data address)
+        (mstore call-data1 units)
+        (call allgas @@wallet 0 call-data 0x44 call-result 0x20)
+        (unless @call-result revert)
     })
 
     (def 'is-token-sender
         (unless (= (caller) @@token) revert))
     
-    (def 'when-not-paused (when (~ @@paused) revert))
-
-    ; internal functions
-    (def 'withdraw-ether {
-        (mstore scratch0 @@(unitsToPay (caller)))
-        (when (< @scratch0 get-sell-min) revert)
-        (when (< (balance (address)) 0) revert)
-        (mstore scratch1 (* @scratch0 get-sell-price))
-        
-        (if (S< (balance (caller)) @scratch1)
-            (sstore (unitsToPay (caller)) 0)
-            {
-                (mstore scratch1 (- @scratch1 (balance (address))))
-                (sstore (unitsToPay (caller)) (- @@(unitsToPay (caller)) @scratch1))
-            })
-        
-        (send (caller) @scratch1)
-        (mstore call-result @scratch1)
-        (events2 withdraw-event (caller))
-    })
-
-    (def 'withdraw-token {
-        (mstore scratch0 (unitsToPay (caller)))
-        (mstore scratch1 $0x04)
-        (when (< @scratch1 @scratch0) revert)
-        (sstore (unitsToPay (caller)) (- @scratch0 @scratch1))
-        (transfer-token (caller) @scratch1)
-        (mstore call-result @scratch1)
-        (events2 withdraw-event (caller))
-    })
+    (def 'when-not-paused (when @@paused revert))
+    (def 'when-paused (when (~ @@paused) revert))
 
     ; Constructor
     (set-owner (caller))
@@ -108,28 +121,63 @@
     (set-sell 150 80000000000000)
 
     (returnlll { uses-function
+
         (function buy { payable when-not-paused
-            (mstore scratch0 (/ (callvalue) get-buy-price))
+            (mstore scratch0 (div-safe (callvalue) get-buy-price))
+            (mstore scratch1 @@wallet)
+        
             (when (>= @scratch0 get-buy-min) revert)
-            (when (>= (balance-of (address)) @scratch0) revert)
-            (transfer-token (caller) @scratch0)
+            (when (>= (token-balance-of @scratch1) @scratch0) revert)
+
+            (send @scratch1 (callvalue))
+            (token-transfer-from @scratch1 (caller) @scratch0)
+
             (mstore call-result @scratch0)
             (events2 buy-event (caller))
+            
+            (mstore call-result true)
+            (return call-result 0x20)
         })
 
-        (def 'type $0x04)
-        (def 'units $0x24)
-        (function withdraw {
-            (if (S= type Ether)
-                withdraw-ether
-                (when (= type Token)
-                withdraw-token))
+        (function sell { has-one-arg when-not-paused
+            (mstore scratch0 $arg1)
+            (wallet-capture-tokens (caller) @scratch0)
+            
+            (sstore (etherToPay (caller)) (mul-safe get-sell-price @scratch0))
+            
+            (events2 sell-event (caller))
+
+            (mstore call-result true)
+            (return call-result 0x20)
         })
 
-        (def 'to $0x04)
-        (def 'value $0x24)
-        (function transfered { is-token-sender
-            (sstore (unitsToPay to) (+ @@(unitsToPay to) value))
+        (function withdraw { when-not-paused
+            (mstore scratch0 @@(etherToPay (caller)))
+            (when (< (balance @@wallet) @scratch0) revert)
+    
+            (sstore (etherToPay (caller)) 0)
+            (wallet-send-ether (caller) @scratch0)
+            (events2 withdraw-event (caller))
+
+            (mstore call-result true)
+            (return call-result 0x20)
+        })
+
+        (function set-buy-price-id { has-one-arg when-paused only-owner
+            (set-buy get-buy-min $arg1)
+        })
+
+        (function set-sell-price-id { has-one-arg when-paused only-owner
+            (set-sell get-sell-min $arg1)
+        })
+
+        (function set-pause-id { has-one-arg only-owner
+            (set-pause $arg1)
+        })
+
+        (function kill { has-one-arg only-owner
+            (is-address $arg1)
+            (selfdestruct $arg1)
         })
 
         not-payable

@@ -1,19 +1,25 @@
 var Store = artifacts.require("Store");
 var Token = artifacts.require("Token");
+var Wallet = artifacts.require("Wallet");
 
 contract('Store', function(accounts){
 
     let store;
     let token;
+    let wallet;
     let buyPrice;
     let sellPrice;
 
     beforeEach(async () => {
         token = await Token.new();
-        store = await Store.new(token.address);
+        wallet = await Wallet.new(token.address);
+        store = await Store.new(token.address, wallet.address);
+
         buyPrice = (await store.buyPrice()).toNumber();
         sellPrice = (await store.sellPrice()).toNumber();
-        await token.transfer(store.address, await token.INITIAL_SUPPLY());
+
+        await wallet.approve(store.address);
+        await token.transfer(wallet.address, await token.INITIAL_SUPPLY());
     });
 
     it('should change the price to buy and sell', async () => {
@@ -42,7 +48,7 @@ contract('Store', function(accounts){
 
     it('should seller 200 tokens', async () => {
         await store.buy({from: accounts[0], value: buyPrice * 200});
-        await token.approve(store.address, 200, {from: accounts[0]});
+        await token.approve(wallet.address, 200, {from: accounts[0]});
         await store.sell(200, {from: accounts[0]});
 
         var balance = await token.balanceOf(accounts[0]);
@@ -54,7 +60,7 @@ contract('Store', function(accounts){
 
     it('should withdraw ethers in balance', async () => {
         await store.buy({from: accounts[0], value: buyPrice * 200});
-        await token.approve(store.address, 200, {from: accounts[0]});
+        await token.approve(wallet.address, 200, {from: accounts[0]});
         await store.sell(200, {from: accounts[0]});
         
         var units = await store.etherToPay(accounts[0]);

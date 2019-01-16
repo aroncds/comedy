@@ -3,13 +3,13 @@ pragma solidity ^0.5.0;
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "./interfaces/IStore.sol";
+import "./interfaces/IWallet.sol";
 
-
-contract Store is Ownable, IStore {
+contract Store is Ownable {
     using SafeMath for uint256;
 
     IERC20 public token;
+    address payable public wallet;
 
     uint128 public buyMin = 100;
     uint128 public withdrawMin = 150;
@@ -45,59 +45,27 @@ contract Store is Ownable, IStore {
         _;
     }
 
-    constructor(address _token) public Ownable() {
-        token = IERC20(_token);
+    constructor(address _token, address payable _wallet) public Ownable() {
+        iSetToken(_token);
+        iSetWallet(_wallet);
     }
 
-    function buy()
+    function iSetWallet(address payable _wallet) internal { wallet = _wallet; }
+    function setWallet(address payable _wallet)
         public
-        payable
-        whenNotPaused
-        returns(bool)
+        onlyOwner
+        whenPaused
     {
-        uint256 units = uint(msg.value).div(buyPrice);
-        require(units >= buyMin, "min-units");
-        require(token.balanceOf(address(this)) >= units, "token-min-units");
-        token.transfer(msg.sender, units);
-
-        emit Buy(msg.sender, units);
-
-        return true;
+        iSetWallet(_wallet);
     }
 
-    function sell(uint256 units)
+    function iSetToken(address _token) internal { token = IERC20(_token); }
+    function setToken(address _token)
         public
-        whenNotPaused
-        returns(bool)
+        onlyOwner
+        whenPaused
     {
-        uint256 balance = token.allowance(msg.sender, address(this));
-        require(balance >= units, "units-indisponible");
-
-        require(
-            token.transferFrom(msg.sender, address(this), units),
-            "transfer-failed");
-
-        etherToPay[msg.sender] = sellPrice.mul(units);
-        comission = comissionValue.mul(units);
-
-        emit Sell(msg.sender, etherToPay[msg.sender]);
-
-        return true;
-    }
-
-    function withdraw()
-        public
-        whenNotPaused
-        returns(bool)
-    {
-        uint256 ethers = etherToPay[msg.sender];
-        require(address(this).balance >= ethers, "balance-down");
-        etherToPay[msg.sender] = 0;
-        msg.sender.transfer(ethers);
-
-        emit Withdraw(msg.sender, ethers);
-        
-        return true;
+        iSetToken(_token);
     }
 
     function setBuyPrice(uint256 value)
@@ -125,11 +93,54 @@ contract Store is Ownable, IStore {
         paused = value;
     }
 
+    function buy()
+        public
+        payable
+        whenNotPaused
+        returns(bool)
+    {
+        uint256 units = uint(msg.value).div(buyPrice);
+        require(units >= buyMin, "min-units");
+        require(token.balanceOf(wallet) >= units, "token-min-units");
+        require(token.transferFrom(wallet, msg.sender, units), "no-transfered");
+        wallet.transfer(msg.value);
+        emit Buy(msg.sender, units);
+        return true;
+    }
+
+    function sell(uint256 units)
+        public
+        whenNotPaused
+        returns(bool)
+    {
+        require(IWallet(wallet).captureTokens(msg.sender, units), "transfer-failed");
+
+        etherToPay[msg.sender] = sellPrice.mul(units);
+        //comission += comissionValue.mul(units);
+
+        emit Sell(msg.sender, etherToPay[msg.sender]);
+        return true;
+    }
+
+    function withdraw()
+        public
+        whenNotPaused
+        returns(bool)
+    {
+        uint256 ethers = etherToPay[msg.sender];
+        require(wallet.balance >= ethers, "balance-down");
+        etherToPay[msg.sender] = 0;
+        IWallet(wallet).sendEther(msg.sender, ethers);
+
+        emit Withdraw(msg.sender, ethers);
+        
+        return true;
+    }
+
     function kill(address payable update)
         public
         onlyOwner
     {
-        token.transfer(update, token.balanceOf(address(this)));
         selfdestruct(update);
     }
 

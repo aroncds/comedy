@@ -1,4 +1,7 @@
 {
+    (def 'true 0x01)
+    (def 'false 0x00)
+
     (def 'mem-func 0x00)
     (def 'call-result 0x40)
 
@@ -21,7 +24,7 @@
         (unless (callvalue) revert))
 
     (def 'is-address (addr)
-        (when (shr address 160) revert))
+        (when (shr addr 160) revert))
     
     (def 'events2 (event arg1) 
         (log2 call-result 32 event arg1))
