@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { drizzleConnect } from 'drizzle-react';
 import { Image } from 'semantic-ui-react';
-import Box from '3dbox';
+//import Box from '3dbox';
 
 
 class Profile extends Component {
@@ -11,14 +11,14 @@ class Profile extends Component {
         this.state = {name: "", image: ""};
     }
 
-    async componentWillMount() {
+    /*async componentWillMount() {
         var profile = await Box.getProfile(this.props.accounts[0]);
         var name = await profile.public.get("name");
         var image = await profile.public.get("image");
 
         this.state.name = name;
         this.state.image = image;
-    }
+    }*/
 
     render() {
         return (
