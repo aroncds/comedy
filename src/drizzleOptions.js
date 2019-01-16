@@ -1,5 +1,6 @@
 import Joke from './../build/contracts/Joke.json';
 import Store from './../build/contracts/Store.json';
+import Token from './../build/contracts/Token.json';
 
 const drizzleOptions = {
   web3: {
@@ -11,17 +12,17 @@ const drizzleOptions = {
   },
   contracts: [
     Joke,
-    Store
+    Store,
+    Token
   ],
   events: {
     Joke: ['Create'],
     Store: [
       'Buy',
       'Sell',
-      'Transfered',
       'Withdraw',
-      'ChangeBuyPrice',
-      'ChangeSellPrice']
+      'BuyPrice',
+      'SellPrice']
   },
   polls: {
     accounts: 1500

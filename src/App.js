@@ -1,20 +1,13 @@
 import React, { Component } from 'react'
-import { Route } from 'react-router'
-import HomeContainer from './layouts/home/HomeContainer'
+import Home from './layouts/Home.js'
 
-
-// Styles
-import './css/oswald.css'
-import './css/open-sans.css'
-import './css/pure-min.css'
-import './App.css'
+import 'semantic-ui-css/semantic.min.css'
+import './css/responsive.css'
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <Route exact path="/" component={HomeContainer}/>
-      </div>
+      <div className="App"><Home /></div>
     );
   }
 }

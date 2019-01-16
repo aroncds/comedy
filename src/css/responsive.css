@@ -1,0 +1,18 @@
+@media (min-width: 1200px) {
+    .ui.container {
+        width: 560px !important;
+    }
+}
+
+.ui.list .list>.item>.content, .ui.list>.item>.content {
+    padding: 20px;
+}
+
+.ui.divided.list>.item {
+    border-right: 1px solid rgba(34,36,38,.15);
+    border-left: 1px solid rgba(34,36,38,.15);
+}
+
+.ui.divided.list>.item:last-child{
+    border-bottom: 1px solid rgba(34,36,38,.15);
+}
