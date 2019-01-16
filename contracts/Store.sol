@@ -68,6 +68,7 @@ contract Store is Ownable {
         iSetToken(_token);
     }
 
+
     function setBuyPrice(uint256 value)
         public
         onlyOwner
