@@ -4,11 +4,12 @@
     (def 'contract 0x04)
     (def 'set-contract-upgrade (address) (sstore contract address))
 
-    (def 'execute-upgradable
+    (def 'execute-upgradable {
         (mstore 0x0 @@contract)
         (unless (= @0x0 0x0) {
             (calldatacopy 0 0x20 (calldatasize))
             (delegatecall allgas @0x0 0x20 (calldatasize) delegate-result 32)
             (return delegate-result 32)
-        }))
+        })
+    })
 }

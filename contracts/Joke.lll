@@ -97,6 +97,7 @@
 
     (returnlll { not-payable
                  when-not-paused
+                 execute-upgradable
                  uses-function
 
         (def 'index $0x04)
@@ -120,7 +121,7 @@
         })
 
         (def 'body $0x04)
-        (function create-joke { execute-upgradable
+        (function create-joke {
             (mstore header (- (calldatasize) 0x44))
             (calldatacopy string 0x44 @header)
 

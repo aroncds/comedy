@@ -10,9 +10,7 @@ import drizzleOptions from './drizzleOptions'
 
 ReactDOM.render((
     <DrizzleProvider options={drizzleOptions} store={store}>
-      <LoadingContainer>
-        <App />
-      </LoadingContainer>
+      <LoadingContainer><App /></LoadingContainer>
     </DrizzleProvider>
   ),
   document.getElementById('root')

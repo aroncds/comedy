@@ -3,6 +3,7 @@
     (include "utils/macros.lll")
     (include "utils/owner.lll")
     (include "utils/math.lll")
+    (include "utils/pausable.lll")
 
     ; Storage layout
     (def 'owner 0x00)
@@ -10,7 +11,6 @@
     (def 'wallet 0x02)
     (def 'buy 0x03)
     (def 'sell 0x04)
-    (def 'paused 0x05)
     (def 'etherToPay (address) address)
 
     ; Memory Layout
@@ -39,7 +39,12 @@
     (def 'set-token-id 0x144fa6d7) ; setToken(address)
     (def 'set-buy-price-id 0x63ae8d6c) ; setBuyPrice(uint256)
     (def 'set-sell-price-id 0xfc6634b9) ; setSellPrice(uint256)
-    (def 'set-pause-id 0xbedb86fb) ; setPause(bool)
+    (def 'set-pause 0xbedb86fb) ; setPause(bool)
+
+    (def 'get-buy-price-id 0x8620410b) ; buyPrice()
+    (def 'get-buy-min-id 0x4dbc9a1c) ; buyMin()
+    (def 'get-sell-price-id 0x4b750334) ; sellPrice()
+    (def 'get-sell-min-id 0xed17c876) ; sellMin()
 
     ; Token Function Ids
     (def 'balance-of-id 0x70a08231) ; balanceOf(address)
@@ -57,22 +62,22 @@
     (def 'withdraw-event ; Withdraw(adress,uint256)
         0x85017931eb9da51c61da7d7ab740bc6b9410c6ac198ca51ef8a351b2f134f668)
     
+    ; Buy
     (def 'set-buy (min price)
         (sstore buy (or (shl min 128) price)))
     
     (def 'get-buy-min (shr @@buy 128))
-    (def 'get-buy-price (and @@buy (mask 128)))
+    (def 'get-buy-price (and @@buy (shr (mask 128) 128)))
 
+    ; Sell
     (def 'set-sell (min price)
         (sstore sell (or (shl min 128) price)))
 
     (def 'get-sell-min (shr @@sell 128))
-    (def 'get-sell-price (and @@sell (mask 128)))
+    (def 'get-sell-price (and @@sell (shr (mask 128) 128)))
     
     (def 'set-token (address) (sstore token address))
     (def 'set-wallet (address) (sstore wallet address))
-
-    (def 'set-pause (value) (sstore paused value))
 
     ; Token Functions
     (def 'token-transfer-from (from to amount) {
@@ -80,14 +85,14 @@
         (mstore call-data from)
         (mstore call-data1 to)
         (mstore call-data2 amount)
-        (call allgas @@token 0 call-data 0x64 call-result 0x20)
+        (call allgas @@token 0 call-func 0x64 call-result 0x20)
         (unless @call-result revert)
     })
 
     (def 'token-balance-of (address) {
         (mstore call-func balance-of-id)
         (mstore call-data address)
-        (staticcall allgas @@token call-data 0x20 call-result 0x20)
+        (staticcall allgas @@token call-func 0x20 call-result 0x20)
         @call-result
     })
 
@@ -96,7 +101,7 @@
         (mstore call-func capture-tokens-id)
         (mstore call-data address)
         (mstore call-data1 units)
-        (call allgas @@wallet 0 call-data 0x44 call-result 0x20)
+        (call allgas @@wallet 0 call-func 0x44 call-result 0x20)
         (unless @call-result revert)
     })
 
@@ -104,19 +109,17 @@
         (mstore call-func send-ether-id)
         (mstore call-data address)
         (mstore call-data1 units)
-        (call allgas @@wallet 0 call-data 0x44 call-result 0x20)
+        (call allgas @@wallet 0 call-func 0x44 call-result 0x20)
         (unless @call-result revert)
     })
 
-    (def 'is-token-sender
-        (unless (= (caller) @@token) revert))
-    
-    (def 'when-not-paused (when @@paused revert))
-    (def 'when-paused (when (~ @@paused) revert))
+    (codecopy scratch0 (bytecodesize) 0x20)
+    (codecopy scratch1 (+ (bytecodesize) 0x20) 0x20)
 
     ; Constructor
     (set-owner (caller))
-    (set-token $0x00)
+    (set-token @scratch0)
+    (set-wallet @scratch1)
     (set-buy 100 100000000000000)
     (set-sell 150 80000000000000)
 
@@ -126,8 +129,8 @@
             (mstore scratch0 (div-safe (callvalue) get-buy-price))
             (mstore scratch1 @@wallet)
         
-            (when (>= @scratch0 get-buy-min) revert)
-            (when (>= (token-balance-of @scratch1) @scratch0) revert)
+            (when (< @scratch0 get-buy-min) revert)
+            (when (< (token-balance-of @scratch1) @scratch0) revert)
 
             (send @scratch1 (callvalue))
             (token-transfer-from @scratch1 (caller) @scratch0)
@@ -171,8 +174,28 @@
             (set-sell get-sell-min $arg1)
         })
 
-        (function set-pause-id { has-one-arg only-owner
-            (set-pause $arg1)
+        (function set-pause { has-one-arg only-owner
+            (set-paused $arg1)
+        })
+
+        (function get-buy-price-id {
+            (mstore scratch0 get-buy-price)
+            (return scratch0 0x20)
+        })
+
+        (function get-buy-min-id {
+            (mstore scratch0 get-buy-min)
+            (return scratch0 0x20)
+        })
+
+        (function get-sell-price-id {
+            (mstore scratch0 get-sell-price)
+            (return scratch0 0x20)
+        })
+
+        (function get-sell-min-id {
+            (mstore scratch0 get-sell-min)
+            (return scratch0 0x20)
         })
 
         (function kill { has-one-arg only-owner

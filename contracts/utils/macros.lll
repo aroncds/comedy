@@ -1,6 +1,6 @@
 {
-    (def 'true 0x01)
-    (def 'false 0x00)
+    (def 'true 0x1)
+    (def 'false 0x0)
 
     (def 'mem-func 0x00)
     (def 'call-result 0x40)
@@ -31,6 +31,10 @@
 
     (def 'has-one-arg
         (unless (= 0x24 (calldatasize)) revert))
+    (def 'has-two-arg
+        (unless (= 0x44 (calldatasize)) revert))
+    (def 'has-three-arg
+        (unless (= 0x64 (calldatasize)) revert))
 
     (def 'mask-1 0xff)
     (def 'mask-4 0xffffffff)
