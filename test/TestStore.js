@@ -1,19 +1,28 @@
 var Store = artifacts.require("Store");
 var Token = artifacts.require("Token");
 var Wallet = artifacts.require("Wallet");
+var Registry = artifacts.require("Registry");
 
 contract('Store', function(accounts){
 
     let store;
     let token;
     let wallet;
+    let registry;
     let buyPrice;
     let sellPrice;
 
     beforeEach(async () => {
+        registry = await Registry.new();
+
         token = await Token.new();
-        wallet = await Wallet.new(token.address);
-        store = await Store.new(token.address, wallet.address);
+        await registry.register("token", token.address);
+
+        wallet = await Wallet.new(registry.address);
+        await registry.register("wallet", wallet.address);
+
+        store = await Store.new(registry.address);
+        await registry.register("store", store.address);
 
         buyPrice = (await store.buyPrice()).toNumber();
         sellPrice = (await store.sellPrice()).toNumber();
@@ -28,12 +37,12 @@ contract('Store', function(accounts){
         var nbPrice = web3.utils.toWei("0.005", "ether");
         var nsPrice = web3.utils.toWei("0.004", "ether");
 
-        await store.setBuyPrice(nbPrice);
+        await store.setBuy(await store.buyMin(), nbPrice);
         var bPrice = await store.buyPrice();
 
         assert.equal(bPrice.toString(), nbPrice, "check if buy price is correct.");
 
-        await store.setSellPrice(nsPrice);
+        await store.setSell(await store.sellMin(), nsPrice);
         var sPrice = await store.sellPrice();
 
         assert.equal(sPrice.toString(), nsPrice, "check if sell price is correct.");
@@ -83,7 +92,7 @@ contract('Store', function(accounts){
         }
     });
 
-    it('should destruct a contract and transfer tokens and ethers', async () => {
+    /*it('should destruct a contract and transfer tokens and ethers', async () => {
         var balance = await web3.eth.getBalance(store.address);
         var tokens = await token.balanceOf(store.address);
     
@@ -91,5 +100,5 @@ contract('Store', function(accounts){
         var units = await token.balanceOf(accounts[1]);
     
         assert.equal(units.toString(), tokens.toString(), "check if token transfer is equal");
-    });
+    });*/
 });

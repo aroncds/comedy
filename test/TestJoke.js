@@ -24,12 +24,13 @@ contract('Joke', function(accounts){
         await instance.setUpgrade(instance2.address, {from: accounts[0]});
 
         var contractAddress = await web3.eth.getStorageAt(instance.address, 4);
-        console.log(contractAddress)
+        //console.log(contractAddress)
 
         await instance.create("Aron", {from: accounts[0]});
 
         var data = await instance.joke(0, {from: accounts[0]});
 
+        assert.equal(contractAddress, instance2.address, "check if contract has been upgraded");
         assert.equal(data[5], "Aron", "check if data have been storaged");
     });
 

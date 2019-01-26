@@ -3,32 +3,33 @@ pragma solidity ^0.5.0;
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+
+import "./library/AddressUtils.sol";
+import "./interfaces/IRegistry.sol";
 import "./interfaces/IWallet.sol";
+
 
 contract Store is Ownable {
     using SafeMath for uint256;
+    using AddressUtils for address;
 
-    IERC20 public token;
-    address payable public wallet;
+    address private registry;
 
     uint128 public buyMin = 100;
-    uint128 public withdrawMin = 150;
+    uint128 public sellMin = 150;
 
     uint256 public buyPrice = 0.0001 ether;
     uint256 public sellPrice = 0.00008 ether;
-
-    uint256 private comissionValue = 0.00002 ether;
-    uint256 private comission = 0;
 
     bool public paused = false;
 
     mapping(address=>uint256) public etherToPay;
 
-    event Buy(address indexed owner, uint256 value);
-    event Sell(address indexed owner, uint256 value);
-    event Withdraw(address indexed target, uint256 sended);
-    event BuyPrice(uint256 value);
-    event SellPrice(uint256 value);
+    event OnBuy(address indexed owner, uint256 value);
+    event OnSell(address indexed owner, uint256 value);
+    event OnWithdraw(address indexed target, uint256 sended);
+    event OnBuyChange(uint256 min, uint256 value);
+    event OnSellChange(uint256 min, uint256 value);
 
     modifier whenNotPaused {
         require(!paused, "paused");
@@ -40,51 +41,32 @@ contract Store is Ownable {
         _;
     }
 
-    modifier isTokenSender {
-        require(msg.sender == address(token));
-        _;
+    constructor(address _registry)
+        public
+        Ownable()
+    {
+        registry = _registry;
     }
 
-    constructor(address _token, address payable _wallet) public Ownable() {
-        iSetToken(_token);
-        iSetWallet(_wallet);
-    }
 
-    function iSetWallet(address payable _wallet) internal { wallet = _wallet; }
-    function setWallet(address payable _wallet)
+    function setBuy(uint256 min, uint256 value)
         public
         onlyOwner
         whenPaused
     {
-        iSetWallet(_wallet);
-    }
-
-    function iSetToken(address _token) internal { token = IERC20(_token); }
-    function setToken(address _token)
-        public
-        onlyOwner
-        whenPaused
-    {
-        iSetToken(_token);
-    }
-
-
-    function setBuyPrice(uint256 value)
-        public
-        onlyOwner
-        whenPaused
-    {
+        buyMin = uint128(min);
         buyPrice = value;
-        emit BuyPrice(value);
+        emit OnBuyChange(min, value);
     }
 
-    function setSellPrice(uint256 value)
+    function setSell(uint256 min, uint256 value)
         public
         onlyOwner
         whenPaused
     {
+        sellMin = uint128(min);
         sellPrice = value;
-        emit SellPrice(value);
+        emit OnSellChange(min, value);
     }
 
     function setPause(bool value)
@@ -101,11 +83,17 @@ contract Store is Ownable {
         returns(bool)
     {
         uint256 units = uint(msg.value).div(buyPrice);
+        address _registry = registry;
+        address payable wallet = IRegistry(_registry).getContract("wallet").toPayable();
+        IERC20 token = IERC20(IRegistry(_registry).getContract("token"));
+
         require(units >= buyMin, "min-units");
         require(token.balanceOf(wallet) >= units, "token-min-units");
         require(token.transferFrom(wallet, msg.sender, units), "no-transfered");
+        
         wallet.transfer(msg.value);
-        emit Buy(msg.sender, units);
+        
+        emit OnBuy(msg.sender, units);
         return true;
     }
 
@@ -114,12 +102,13 @@ contract Store is Ownable {
         whenNotPaused
         returns(bool)
     {
-        require(IWallet(wallet).captureTokens(msg.sender, units), "transfer-failed");
+        address wallet = IRegistry(registry).getContract("wallet");
+        require(IWallet(wallet)
+            .captureTokens(msg.sender, units), "capture-failed");
 
         etherToPay[msg.sender] = sellPrice.mul(units);
-        //comission += comissionValue.mul(units);
 
-        emit Sell(msg.sender, etherToPay[msg.sender]);
+        emit OnSell(msg.sender, etherToPay[msg.sender]);
         return true;
     }
 
@@ -128,21 +117,16 @@ contract Store is Ownable {
         whenNotPaused
         returns(bool)
     {
+        address wallet = IRegistry(registry).getContract("wallet");
         uint256 ethers = etherToPay[msg.sender];
-        require(wallet.balance >= ethers, "balance-down");
         etherToPay[msg.sender] = 0;
-        IWallet(wallet).sendEther(msg.sender, ethers);
 
-        emit Withdraw(msg.sender, ethers);
+        require(wallet.balance >= ethers, "balance-down");
+        require(IWallet(wallet).sendEther(msg.sender, ethers), "send-failed");
+
+        emit OnWithdraw(msg.sender, ethers);
         
         return true;
-    }
-
-    function kill(address payable update)
-        public
-        onlyOwner
-    {
-        selfdestruct(update);
     }
 
     function () external {
