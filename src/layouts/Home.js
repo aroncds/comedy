@@ -1,20 +1,20 @@
 import React, { Component } from 'react';
-import { Container, Menu, Input } from 'semantic-ui-react';
+import { Container, Menu, Icon } from 'semantic-ui-react';
+
 import { JokeFormContainer, JokeListContainer } from '../components/Joke.js';
-import { BuyComponent } from '../components/Store.js';
-import Profile from '../components/Profile';
+import { TokenApproveComponent } from '../components/Actions';
+import Store from '../components/Store.js';
 
 
 export default class Home extends Component {
     render() {
         return (
             <Container fluid>
-                <Menu secondary>
-                    <Menu.Item><Profile /></Menu.Item>
-                    <Menu.Item><Input icon='search' placeholder='Search...' /></Menu.Item>
-                    <Menu.Item position='right'><BuyComponent /></Menu.Item>
+                <Menu icon>
+                    <Menu.Item><Icon name="podcast"/></Menu.Item>
+                    <TokenApproveComponent key={1}/>
+                    <Store key={2}/>
                 </Menu>
-
                 <JokeFormContainer />
                 <JokeListContainer />
             </Container>

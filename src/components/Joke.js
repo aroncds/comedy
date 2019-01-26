@@ -1,16 +1,21 @@
 import React, { Component } from 'react'
-import PropTypes from "prop-types";
+import { object, number } from "prop-types";
 import { drizzleConnect } from 'drizzle-react';
+import { withNamespaces } from 'react-i18next';
+import { reverse } from '../util/arrays';
 import {
   Segment,
   Form,
   Loader,
   List,
-  Transition} from 'semantic-ui-react';
-import { reverse } from '../util/arrays';
+  Transition } from 'semantic-ui-react';
 
 
 class Joke extends Component {
+
+  static propTypes = {
+    id: number.isRequired
+  }
 
   constructor(props, context){
     super(props);
@@ -33,30 +38,30 @@ class Joke extends Component {
     return data[4];
   }
 
-  render() {
-
+  renderContent(){
     if(!(this.dataKey && this.props.Joke.joke[this.dataKey])){
-      return (
-        <Segment>
-          <Loader active />
-        </Segment>
-      )
+      return <Loader active />;
     }
+    
+    return [
+      <List.Header>{this.getOwner()}</List.Header>,
+      <List.Description>{this.getBody()}</List.Description>
+    ];
+  }
+
+  render() {
 
     return (
       <List.Item>
         <List.Content>
-          <List.Header>{this.getOwner()}</List.Header>
-          <List.Description>{this.getBody()}</List.Description>
+          {this.renderContent()}
         </List.Content>
       </List.Item>
     )
   }
 }
 
-Joke.contextTypes = {
-  drizzle: PropTypes.object
-}
+Joke.contextTypes = { drizzle: object };
 
 const JokeComponent = drizzleConnect(Joke, state => {
   return {
@@ -67,58 +72,63 @@ const JokeComponent = drizzleConnect(Joke, state => {
 
 
 class JokeForm extends Component {
+  state = {body: "", error: false, loading: false}
 
   constructor(props, context){
     super(props);
-    this.state = this.getInitialState();
     this.contract = context.drizzle.contracts.Joke;
-    this.handleState = this.handleChange.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleBody = this.handleBody.bind(this);
   }
 
-  getInitialState() {
-    return {body: "", loading: false};
+  isValid(){
+    if (this.state.body.length > 5){
+      return true;
+    }
+
+    this.setState({error: true});
+    return false;
   }
 
-  onSubmit() {
-    this.setState({loading:true});
-    var result = this.contract.methods.create.cacheSend(this.state.body);
-    this.setState({loading:false, body:""});
+  handleSubmit() {
+    if (this.isValid()){
+      this.contract.methods.create.cacheSend(this.state.body);
+    }
   }
 
-  handleChange(e) {
-    var state = {};
-    state[e.target.id] = e.target.value;
-    this.setState(state);
+  handleBody(e) {
+    this.setState({body: e.target.value});
   }
 
   render(){
+    const { t } = this.props;
+    const { loading, error, body } = this.state;
+  
     return (
-      <Form loading={this.state.loading} onSubmit={this.onSubmit}>
+      <Form loading={loading} onSubmit={this.handleSubmit}>
         <Segment>
           <Form.TextArea
             id="body"
-            placeholder="Write your joke..."
-            value={this.state.body}
-            onChange={this.handleState}></Form.TextArea>
+            placeholder={t("write joke")}
+            onChange={this.handleBody}
+            value={body}
+            error={error}></Form.TextArea>
           
-          <Form.Button type="submit" content="Salvar" />
+          <Form.Button type="submit" content={t("save")} />
         </Segment>
       </Form>
     );
   }
 }
 
-JokeForm.contextTypes = {
-  drizzle: PropTypes.object
-}
+JokeForm.contextTypes = { drizzle: object };
 
-export const JokeFormContainer = drizzleConnect(JokeForm, state => {
+export const JokeFormContainer = withNamespaces("translation")(drizzleConnect(JokeForm, state => {
   return {
     accounts: state.accounts,
     drizzleStatus: state.drizzleStatus
   }
-});
+}));
 
 
 class JokeList extends Component {
@@ -148,9 +158,7 @@ class JokeList extends Component {
   }
 }
 
-JokeList.contextTypes = {
-  drizzle: PropTypes.object
-}
+JokeList.contextTypes = { drizzle: object };
 
 export const JokeListContainer = drizzleConnect(JokeList, state => {
   return {
@@ -159,3 +167,4 @@ export const JokeListContainer = drizzleConnect(JokeList, state => {
     drizzleStatus: state.drizzleStatus
   }
 });
+ 

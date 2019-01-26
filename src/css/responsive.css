@@ -3,6 +3,12 @@
         width: 560px !important;
     }
 }
+.ui.container{
+    padding-top: 20px;
+}
+.ui.list, ol.ui.list, ul.ui.list {
+    margin: 0;
+}
 
 .ui.list .list>.item>.content, .ui.list>.item>.content {
     padding: 20px;

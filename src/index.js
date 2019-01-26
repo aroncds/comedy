@@ -8,6 +8,8 @@ import { LoadingContainer } from 'drizzle-react-components'
 import { store } from './store'
 import drizzleOptions from './drizzleOptions'
 
+import './i18n'
+
 ReactDOM.render((
     <DrizzleProvider options={drizzleOptions} store={store}>
       <LoadingContainer><App /></LoadingContainer>
