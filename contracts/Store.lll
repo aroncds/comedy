@@ -1,24 +1,17 @@
 {   ; contract Store
 
-    (include "utils/macros.lll")
+    (include "utils/stdlib.lll")
     (include "utils/owner.lll")
     (include "utils/math.lll")
     (include "utils/pausable.lll")
+    (include "utils/registry.lll")
+    (include "utils/wallet.lll")
 
     ; Storage layout
     (def 'owner 0x00)
-    (def 'token 0x01)
-    (def 'wallet 0x02)
     (def 'buy 0x03)
     (def 'sell 0x04)
     (def 'etherToPay (address) address)
-
-    ; Memory Layout
-    (def 'call-func 0x00)
-    (def 'call-data 0x04)
-    (def 'call-data1 0x24)
-    (def 'call-data2 0x44)
-    (def 'call-result 0x00)
 
     ; Scratch
     (def 'scratch0 0x60)
@@ -33,10 +26,8 @@
     (def 'buy 0xa6f2ae3a) ; buy()
     (def 'sell 0xe4849b32) ; sell(uint256)
     (def 'withdraw 0x3ccfd60b) ; withdraw()
-    (def 'kill 0xcbf0b0c0) ; kill(address)
+    ; (def 'kill 0xcbf0b0c0) ; kill(address)
 
-    (def 'set-wallet-id 0xdeaa59df) ; setWallet(address)
-    (def 'set-token-id 0x144fa6d7) ; setToken(address)
     (def 'set-buy-price-id 0x63ae8d6c) ; setBuyPrice(uint256)
     (def 'set-sell-price-id 0xfc6634b9) ; setSellPrice(uint256)
     (def 'set-pause 0xbedb86fb) ; setPause(bool)
@@ -45,14 +36,6 @@
     (def 'get-buy-min-id 0x4dbc9a1c) ; buyMin()
     (def 'get-sell-price-id 0x4b750334) ; sellPrice()
     (def 'get-sell-min-id 0xed17c876) ; sellMin()
-
-    ; Token Function Ids
-    (def 'balance-of-id 0x70a08231) ; balanceOf(address)
-    (def 'transfer-from-id 0x23b872dd) ; transferFrom(address,address,uint256)
-
-    ; Wallet Function Ids
-    (def 'capture-tokens-id 0xcbf27cdd) ; captureTokens(address,uint256)
-    (def 'send-ether-id 0xc1756a2c) ; sendEther(address,uint256)
 
     ; Events
     (def 'buy-event ; Buy(address,uint256)
@@ -75,51 +58,12 @@
 
     (def 'get-sell-min (shr @@sell 128))
     (def 'get-sell-price (and @@sell (shr (mask 128) 128)))
-    
-    (def 'set-token (address) (sstore token address))
-    (def 'set-wallet (address) (sstore wallet address))
-
-    ; Token Functions
-    (def 'token-transfer-from (from to amount) {
-        (mstore call-func transfer-from-id)
-        (mstore call-data from)
-        (mstore call-data1 to)
-        (mstore call-data2 amount)
-        (call allgas @@token 0 call-func 0x64 call-result 0x20)
-        (unless @call-result revert)
-    })
-
-    (def 'token-balance-of (address) {
-        (mstore call-func balance-of-id)
-        (mstore call-data address)
-        (staticcall allgas @@token call-func 0x20 call-result 0x20)
-        @call-result
-    })
-
-    ; Wallet Functions
-    (def 'wallet-capture-tokens (address units) {
-        (mstore call-func capture-tokens-id)
-        (mstore call-data address)
-        (mstore call-data1 units)
-        (call allgas @@wallet 0 call-func 0x44 call-result 0x20)
-        (unless @call-result revert)
-    })
-
-    (def 'wallet-send-ether (address units) {
-        (mstore call-func send-ether-id)
-        (mstore call-data address)
-        (mstore call-data1 units)
-        (call allgas @@wallet 0 call-func 0x44 call-result 0x20)
-        (unless @call-result revert)
-    })
 
     (codecopy scratch0 (bytecodesize) 0x20)
-    (codecopy scratch1 (+ (bytecodesize) 0x20) 0x20)
 
     ; Constructor
     (set-owner (caller))
-    (set-token @scratch0)
-    (set-wallet @scratch1)
+    (set-registry @scratch0)
     (set-buy 100 100000000000000)
     (set-sell 150 80000000000000)
 
@@ -127,7 +71,6 @@
 
         (function buy { payable when-not-paused
             (mstore scratch0 (div-safe (callvalue) get-buy-price))
-            (mstore scratch1 @@wallet)
         
             (when (< @scratch0 get-buy-min) revert)
             (when (< (token-balance-of @scratch1) @scratch0) revert)
@@ -168,14 +111,17 @@
 
         (function set-buy-price-id { has-one-arg when-paused only-owner
             (set-buy get-buy-min $arg1)
+            (stop)
         })
 
         (function set-sell-price-id { has-one-arg when-paused only-owner
             (set-sell get-sell-min $arg1)
+            (stop)
         })
 
         (function set-pause { has-one-arg only-owner
             (set-paused $arg1)
+            (stop)
         })
 
         (function get-buy-price-id {
@@ -198,10 +144,11 @@
             (return scratch0 0x20)
         })
 
-        (function kill { has-one-arg only-owner
-            (is-address $arg1)
-            (selfdestruct $arg1)
-        })
+        ;(function kill { has-one-arg only-owner
+        ;    (is-address $arg1)
+        ;    (selfdestruct $arg1)
+        ;    (stop)
+        ;})
 
         not-payable
         (jump invalid-location)

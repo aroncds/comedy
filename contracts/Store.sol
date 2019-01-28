@@ -106,7 +106,7 @@ contract Store is Ownable {
         require(IWallet(wallet)
             .captureTokens(msg.sender, units), "capture-failed");
 
-        etherToPay[msg.sender] = sellPrice.mul(units);
+        etherToPay[msg.sender] += sellPrice.mul(units);
 
         emit OnSell(msg.sender, etherToPay[msg.sender]);
         return true;

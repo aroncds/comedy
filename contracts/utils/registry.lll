@@ -1,0 +1,17 @@
+{   ; Registry Contract
+
+    (def 'registry-wallet-len 0x6)
+    (def 'registry-wallet (shl 0x77616c6c6574 208))
+
+    (def 'registry-token-len 0x5)
+    (def 'registry-token (shl 0x746f6b656e 216))
+
+    (def 'registry 0x10)
+    (def 'set-registry (value) (sstore registry value))
+
+    ; Function Ids
+    (def 'get-contract 0x35817773) ; getContract(string)
+
+    (def 'registry-get-contract (len msg)
+        (staticcall3 @@registry get-contract 0x20 len msg 0x20))
+}

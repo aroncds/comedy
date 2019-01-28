@@ -65,7 +65,8 @@ contract Wallet is Ownable {
         onlyApproved
         returns(bool)
     {
-        IERC20(IRegistry(registry).getContract("token")).transferFrom(from, to, units);
+        require(IERC20(IRegistry(registry).getContract("token"))
+            .transferFrom(from, to, units), "no-transfered");
         emit OnSendToken(from, to, units);
         return true;
     }

@@ -1,0 +1,81 @@
+{
+    (def 'true 0x1)
+    (def 'false 0x0)
+
+    (def 'mem-func 0x00)
+
+    ; Memory Layout
+    (def 'call-func 0x00)
+    (def 'call-data 0x04)
+    (def 'call-data1 0x24)
+    (def 'call-data2 0x44)
+    (def 'call-result 0x00)
+
+    (def 'revert (revert 0 0))
+
+    (def 'invalid-location 0x02)
+
+    (def 'uses-function {
+        (mstore mem-func 0)
+        (calldatacopy (+ mem-func 28) 0x00 0x04)
+    })
+
+    (def 'function (function-hash code-body)
+        (when (= @mem-func function-hash) code-body))
+
+    (def 'not-payable
+        (when (callvalue) revert))
+
+    (def 'payable
+        (unless (callvalue) revert))
+
+    (def 'is-address (addr)
+        (when (shr addr 160) revert))
+    
+    (def 'events2 (event arg1) 
+        (log2 call-result 32 event arg1))
+
+    (def 'events3 (event arg1 arg2) 
+        (log3 call-result 32 event arg1 arg2))
+    
+    (def 'call2 (contract value func arg1 arg2) {
+        (mstore call-func (shl func 224))
+        (mstore call-data arg1)
+        (mstore call-data1 arg2)
+        (call allgas contract value call-func 0x44 call-result 0x20)
+        (unless @call-result revert)
+        @call-result
+    })
+
+    (def 'call3 (contract value cfunc carg1 carg2 carg3 result-len) {
+        (mstore call-func (shl cfunc 224))
+        (mstore call-data carg1)
+        (mstore call-data1 carg2)
+        (mstore call-data2 carg3)
+        (call allgas contract value call-func 0x64 call-result result-len)
+        (unless @call-result revert)
+        @call-result
+    })
+
+    (def 'staticcall3 (contract sfunc sarg1 sarg2 sarg3 result-len) {
+        (mstore call-func (shl sfunc 224))
+        (mstore call-data sarg1)
+        (mstore call-data1 sarg2)
+        (mstore call-data2 sarg3)
+        (staticcall allgas contract call-func 0x64 call-result result-len)
+        (unless @call-result revert)
+        @call-result
+    })
+
+    (def 'has-one-arg
+        (unless (= 0x24 (calldatasize)) revert))
+    (def 'has-two-arg
+        (unless (= 0x44 (calldatasize)) revert))
+    (def 'has-three-arg
+        (unless (= 0x64 (calldatasize)) revert))
+
+    (def 'mask-1 0xff)
+    (def 'mask-4 0xffffffff)
+    (def 'mask-8 0xffffffffffffffff)
+    (def 'mask (value) (- (exp 2 value) 1))
+}

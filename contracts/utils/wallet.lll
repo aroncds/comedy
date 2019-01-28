@@ -1,0 +1,25 @@
+{   ; Wallet Function Ids
+
+    (def 'capture-tokens-id 0xcbf27cdd) ; captureTokens(address,uint256)
+    (def 'send-ether-id 0xc1756a2c) ; sendEther(address,uint256)
+    (def 'send-token-id 0x2fdcfbd2) ; sendToken(address,address,uint256)
+
+    (def 'wallet-capture-tokens (contract address units) {
+        (mstore call-func capture-tokens-id)
+        (mstore call-data address)
+        (mstore call-data1 units)
+        (call allgas contract 0 call-func 0x44 call-result 0x20)
+        (unless @call-result revert)
+    })
+
+    (def 'wallet-send-ether (address units) {
+        (mstore call-func send-ether-id)
+        (mstore call-data address)
+        (mstore call-data1 units)
+        (call allgas contract 0 call-func 0x44 call-result 0x20)
+        (unless @call-result revert)
+    })
+
+    (def 'wallet-send-token (contract from to units)
+        (call3 contract 0 send-token-id from to units 0x20))
+}

@@ -1,0 +1,23 @@
+{   ; Token Functions
+
+    ; Token Function Ids
+    (def 'balance-of-id 0x70a08231) ; balanceOf(address)
+    (def 'transfer-from-id 0x23b872dd) ; transferFrom(address,address,uint256)
+
+    (def 'token-transfer-from (contract from to amount) {
+        (mstore call-func transfer-from-id)
+        (mstore call-data from)
+        (mstore call-data1 to)
+        (mstore call-data2 amount)
+        (call address contract 0 call-func 0x64 call-result 0x20)
+        (unless @call-result revert)
+    })
+
+    (def 'token-balance-of (contract address) {
+        (mstore call-func balance-of-id)
+        (mstore call-data address)
+        (staticcall allgas contract call-func 0x20 call-result 0x20)
+        @call-result
+    })
+
+}
