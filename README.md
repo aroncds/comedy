@@ -1,6 +1,6 @@
 # Comedy
 
-This project is a kidding, it isn't revolutionary, but is cool, here you can make a joke and post in the blockchain(your joke can't be removed), the users can buy tokens(LGH) and give to you for joke!
+This is a simple project, you can post a joke in the blockchain(your joke can't be removed) and the user can buy tokens(LGH) and give to you how a way of thank!
 
 I hope you enjoy! =]
 
