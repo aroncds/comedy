@@ -139,6 +139,7 @@ class Joke extends Component {
             onMouseLeave={this.handleLikeClose}
             as={List.Content}
             dimmed={active}>
+
           <Dimmer active={active} inverted>
             <LikeComponent
               jokeId={this.props.id}
@@ -171,10 +172,11 @@ class JokeForm extends Component {
     this.contract = context.drizzle.contracts.Joke;
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleBody = this.handleBody.bind(this);
+    this.handleStatus = this.handleStatus.bind(this);
   }
 
   isValid(){
-    if (this.state.body.length > 5){
+    if (this.state.body.length > 0){
       return true;
     }
 
@@ -182,9 +184,29 @@ class JokeForm extends Component {
     return false;
   }
 
+  handleStatus(){
+    const { transactionStack, transactions } = this.props;
+  
+    if (this.stackId != undefined){
+      var transaction = transactionStack[this.stackId];
+      if (transaction && transaction.length){
+        var status = transactions[transaction].status;
+
+        if (status == "success" || status == "error"){
+          this.setState({loading: false});
+          return;
+        }
+      }
+    }
+
+    setTimeout(this.handleStatus, 1000);
+  }
+
   handleSubmit() {
     if (this.isValid()){
-      this.contract.methods.create.cacheSend(this.state.body);
+      this.stackId = this.contract.methods.create.cacheSend(this.state.body);
+      this.handleStatus();
+      this.setState({loading:true});
     }
   }
 
@@ -218,7 +240,8 @@ JokeForm.contextTypes = { drizzle: object };
 export const JokeFormContainer = withNamespaces("translation")(drizzleConnect(JokeForm, state => {
   return {
     accounts: state.accounts,
-    drizzleStatus: state.drizzleStatus
+    transactionStack: state.transactionStack,
+    transactions: state.transactions
   }
 }));
 
@@ -255,8 +278,7 @@ JokeList.contextTypes = { drizzle: object };
 export const JokeListContainer = drizzleConnect(JokeList, state => {
   return {
     accounts: state.accounts,
-    Joke: state.contracts.Joke,
-    drizzleStatus: state.drizzleStatus
+    Joke: state.contracts.Joke
   }
 });
  

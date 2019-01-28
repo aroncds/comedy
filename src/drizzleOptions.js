@@ -18,10 +18,12 @@ const drizzleOptions = {
     Wallet
   ],
   events: {
-    Joke: ['Create'],
+    Joke: [
+      'Create',
+      'Like'],
     Token: [
-      "Approval",
-      "Transfer"],
+      'Approval',
+      'Transfer'],
     Store: [
       'OnBuy',
       'OnSell',
