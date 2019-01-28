@@ -8,10 +8,72 @@ import {
   Form,
   Loader,
   List,
+  Dimmer,
+  Button,
+  Icon,
   Transition } from 'semantic-ui-react';
 
 
+class Like extends Component {
+  state = {open: false, units: ""};
+
+  static propTypes = {
+    joke: object.isRequired,
+    jokeId: number.isRequired
+  }
+
+  constructor(props){
+    super(props);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleUnits = this.handleUnits.bind(this);
+  }
+
+  isValid(){
+    var units = parseInt(this.state.units);
+
+    if(units && units > 0){
+      return true;
+    }
+
+    return false;
+  }
+
+  handleUnits(e){
+    this.setState({units: e.target.value});
+  }
+
+  handleSubmit(){
+    const { units } = this.state;
+    const { joke, jokeId } = this.props;
+
+    if(this.isValid()){
+      joke.methods.addLike.cacheSend(jokeId, units);
+      this.props.onClose();
+    }
+  }
+
+  render() {
+    const { t } = this.props;
+    const { units } = this.state;
+  
+    return (
+      <Form onSubmit={this.handleSubmit}>
+        <Form.Input
+          type="number"
+          value={units}
+          onChange={this.handleUnits}
+          action={{ color: 'teal', labelPosition: 'left', icon: 'like', content: t('send') }}
+          placeholder={t("amount")} />
+      </Form>
+    );
+  }
+}
+
+const LikeComponent = withNamespaces("translation")(Like);
+
+
 class Joke extends Component {
+  state = { active: false };
 
   static propTypes = {
     id: number.isRequired
@@ -21,6 +83,13 @@ class Joke extends Component {
     super(props);
     this.joke = context.drizzle.contracts.Joke;
     this.dataKey = this.joke.methods.joke.cacheCall(props.id);
+    this.handleLike = this.handleLike.bind(this);
+    this.handleLikeClose = this.handleLikeClose.bind(this);
+  }
+
+  getLikes(){
+    var data = this.props.Joke.joke[this.dataKey].value;
+    return data[3];
   }
 
   getBody() {
@@ -38,24 +107,47 @@ class Joke extends Component {
     return data[4];
   }
 
+  handleLike(){
+    this.setState({active: true});
+  }
+
+  handleLikeClose(){
+    this.setState({active: false});
+  }
+
   renderContent(){
     if(!(this.dataKey && this.props.Joke.joke[this.dataKey])){
-      return <Loader active />;
+      return <Segment><Loader active /></Segment>;
     }
     
     return [
       <List.Header>{this.getOwner()}</List.Header>,
-      <List.Description>{this.getBody()}</List.Description>
+      <List.Description>
+        {this.getBody()}
+        <br /><br />
+        <Button onClick={this.handleLike} compact><Icon name="like"/> ({this.getLikes()})</Button>
+      </List.Description>
     ];
   }
 
   render() {
+    const { active } = this.state;
 
     return (
       <List.Item>
-        <List.Content>
+        <Dimmer.Dimmable
+            onMouseLeave={this.handleLikeClose}
+            as={List.Content}
+            dimmed={active}>
+          <Dimmer active={active} inverted>
+            <LikeComponent
+              jokeId={this.props.id}
+              joke={this.joke}
+              onClose={this.handleLikeClose}/>
+          </Dimmer>
+
           {this.renderContent()}
-        </List.Content>
+        </Dimmer.Dimmable>
       </List.Item>
     )
   }

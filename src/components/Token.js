@@ -6,6 +6,7 @@ import {
   Form,
   Modal, 
   Menu,
+  Icon,
   Label } from 'semantic-ui-react';
 
 
@@ -24,6 +25,7 @@ class TokenApprove extends Component {
     this.handleOpen = this.handleOpen.bind(this);
     this.handleClose = this.handleClose.bind(this);
     this.handleUnits = this.handleUnits.bind(this);
+    this.handleApprove = this.handleApprove.bind(this);
   }
 
   getAllowanceUnits(){
@@ -34,7 +36,11 @@ class TokenApprove extends Component {
   }
 
   isValid() {
-
+    var units = parseInt(this.state.units);
+    if (units && units > 0){
+      return true;
+    }
+    return false;
   }
 
   handleOpen(){
@@ -62,7 +68,7 @@ class TokenApprove extends Component {
         color="green"
         position="right"
         onClick={this.handleOpen}>
-          {t("approve")} <Label color='teal'>{this.getAllowanceUnits()}</Label>
+          <Icon name="check" /><Label color='teal'>{this.getAllowanceUnits()}</Label>
       </Menu.Item>
     );
   }
@@ -98,7 +104,7 @@ class TokenApprove extends Component {
 
 TokenApprove.contextTypes = { drizzle: object };
 
-export const TokenApproveComponent = withNamespaces("translation")(drizzleConnect(TokenApprove, state => {
+export const ApproveComponent = withNamespaces("translation")(drizzleConnect(TokenApprove, state => {
   return {
     Token: state.contracts.Token,
     Wallet: state.contracts.Wallet,

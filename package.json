@@ -1,6 +1,6 @@
 {
-  "name": "drizzle-box",
-  "version": "1.0.0",
+  "name": "comedy",
+  "version": "0.0.1",
   "devDependencies": {
     "ganache-cli": "^6.1.6",
     "truffle": "^5.0.0",

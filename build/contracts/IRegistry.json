@@ -2,7 +2,7 @@
   "contractName": "IRegistry",
   "abi": [
     {
-      "constant": true,
+      "constant": false,
       "inputs": [
         {
           "name": "name",
@@ -17,7 +17,7 @@
         }
       ],
       "payable": false,
-      "stateMutability": "view",
+      "stateMutability": "nonpayable",
       "type": "function"
     }
   ],
@@ -25,20 +25,20 @@
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity ^0.5.0;\n\ninterface IRegistry {\n    function getContract(string calldata name) external view returns(address);\n}",
+  "source": "pragma solidity ^0.5.0;\n\ninterface IRegistry {\n    function getContract(string calldata name) external returns(address);\n}",
   "sourcePath": "/Users/aroncastrocoelho/projects/comedy/contracts/interfaces/IRegistry.sol",
   "ast": {
     "absolutePath": "/Users/aroncastrocoelho/projects/comedy/contracts/interfaces/IRegistry.sol",
     "exportedSymbols": {
       "IRegistry": [
-        779
+        812
       ]
     },
-    "id": 780,
+    "id": 813,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 771,
+        "id": 804,
         "literals": [
           "solidity",
           "^",
@@ -54,9 +54,9 @@
         "contractKind": "interface",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 779,
+        "id": 812,
         "linearizedBaseContracts": [
-          779
+          812
         ],
         "name": "IRegistry",
         "nodeType": "ContractDefinition",
@@ -64,22 +64,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 778,
+            "id": 811,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getContract",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 774,
+              "id": 807,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 773,
+                  "id": 806,
                   "name": "name",
                   "nodeType": "VariableDeclaration",
-                  "scope": 778,
+                  "scope": 811,
                   "src": "72:20:6",
                   "stateVariable": false,
                   "storageLocation": "calldata",
@@ -88,7 +88,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 772,
+                    "id": 805,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "72:6:6",
@@ -104,16 +104,16 @@
               "src": "71:22:6"
             },
             "returnParameters": {
-              "id": 777,
+              "id": 810,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 776,
+                  "id": 809,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 778,
-                  "src": "116:7:6",
+                  "scope": 811,
+                  "src": "111:7:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -121,10 +121,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 775,
+                    "id": 808,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "116:7:6",
+                    "src": "111:7:6",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -135,33 +135,33 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "115:9:6"
+              "src": "110:9:6"
             },
-            "scope": 779,
-            "src": "51:74:6",
-            "stateMutability": "view",
+            "scope": 812,
+            "src": "51:69:6",
+            "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 780,
-        "src": "25:102:6"
+        "scope": 813,
+        "src": "25:97:6"
       }
     ],
-    "src": "0:127:6"
+    "src": "0:122:6"
   },
   "legacyAST": {
     "absolutePath": "/Users/aroncastrocoelho/projects/comedy/contracts/interfaces/IRegistry.sol",
     "exportedSymbols": {
       "IRegistry": [
-        779
+        812
       ]
     },
-    "id": 780,
+    "id": 813,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 771,
+        "id": 804,
         "literals": [
           "solidity",
           "^",
@@ -177,9 +177,9 @@
         "contractKind": "interface",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 779,
+        "id": 812,
         "linearizedBaseContracts": [
-          779
+          812
         ],
         "name": "IRegistry",
         "nodeType": "ContractDefinition",
@@ -187,22 +187,22 @@
           {
             "body": null,
             "documentation": null,
-            "id": 778,
+            "id": 811,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getContract",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 774,
+              "id": 807,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 773,
+                  "id": 806,
                   "name": "name",
                   "nodeType": "VariableDeclaration",
-                  "scope": 778,
+                  "scope": 811,
                   "src": "72:20:6",
                   "stateVariable": false,
                   "storageLocation": "calldata",
@@ -211,7 +211,7 @@
                     "typeString": "string"
                   },
                   "typeName": {
-                    "id": 772,
+                    "id": 805,
                     "name": "string",
                     "nodeType": "ElementaryTypeName",
                     "src": "72:6:6",
@@ -227,16 +227,16 @@
               "src": "71:22:6"
             },
             "returnParameters": {
-              "id": 777,
+              "id": 810,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 776,
+                  "id": 809,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 778,
-                  "src": "116:7:6",
+                  "scope": 811,
+                  "src": "111:7:6",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -244,10 +244,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 775,
+                    "id": 808,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "116:7:6",
+                    "src": "111:7:6",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -258,20 +258,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "115:9:6"
+              "src": "110:9:6"
             },
-            "scope": 779,
-            "src": "51:74:6",
-            "stateMutability": "view",
+            "scope": 812,
+            "src": "51:69:6",
+            "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 780,
-        "src": "25:102:6"
+        "scope": 813,
+        "src": "25:97:6"
       }
     ],
-    "src": "0:127:6"
+    "src": "0:122:6"
   },
   "compiler": {
     "name": "solc",
@@ -279,7 +279,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.0",
-  "updatedAt": "2019-01-24T16:36:24.538Z",
+  "updatedAt": "2019-01-27T23:37:41.474Z",
   "devdoc": {
     "methods": {}
   },

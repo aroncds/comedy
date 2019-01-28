@@ -8,8 +8,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x715018a6"
+      "type": "function"
     },
     {
       "constant": true,
@@ -23,8 +22,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x8da5cb5b"
+      "type": "function"
     },
     {
       "constant": true,
@@ -38,8 +36,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x8f32d59b"
+      "type": "function"
     },
     {
       "constant": false,
@@ -53,8 +50,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0xf2fde38b"
+      "type": "function"
     },
     {
       "anonymous": false,
@@ -71,8 +67,7 @@
         }
       ],
       "name": "OwnershipTransferred",
-      "type": "event",
-      "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+      "type": "event"
     },
     {
       "constant": false,
@@ -90,8 +85,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x1e59c529"
+      "type": "function"
     },
     {
       "constant": true,
@@ -110,8 +104,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x35817773"
+      "type": "function"
     }
   ],
   "bytecode": "0x6080604052336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055506000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16600073ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a36106a6806100cf6000396000f3fe608060405260043610610078576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680631e59c5291461007d5780633581777314610165578063715018a61461026d5780638da5cb5b146102845780638f32d59b146102db578063f2fde38b1461030a575b600080fd5b34801561008957600080fd5b50610163600480360360408110156100a057600080fd5b81019080803590602001906401000000008111156100bd57600080fd5b8201836020820111156100cf57600080fd5b803590602001918460018302840111640100000000831117156100f157600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f820116905080830192505050505050509192919290803573ffffffffffffffffffffffffffffffffffffffff16906020019092919050505061035b565b005b34801561017157600080fd5b5061022b6004803603602081101561018857600080fd5b81019080803590602001906401000000008111156101a557600080fd5b8201836020820111156101b757600080fd5b803590602001918460018302840111640100000000831117156101d957600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f8201169050808301925050505050505091929192905050506103cb565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34801561027957600080fd5b5061028261040f565b005b34801561029057600080fd5b506102996104e1565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b3480156102e757600080fd5b506102f061050a565b604051808215151515815260200191505060405180910390f35b34801561031657600080fd5b506103596004803603602081101561032d57600080fd5b81019080803573ffffffffffffffffffffffffffffffffffffffff169060200190929190505050610561565b005b61036361050a565b151561036e57600080fd5b80600160008480519060200120815260200190815260200160002060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505050565b6000600160008380519060200120815260200190815260200160002060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff169050919050565b61041761050a565b151561042257600080fd5b600073ffffffffffffffffffffffffffffffffffffffff166000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a360008060006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550565b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16905090565b60008060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614905090565b61056961050a565b151561057457600080fd5b61057d81610580565b50565b600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff16141515156105bc57600080fd5b8073ffffffffffffffffffffffffffffffffffffffff166000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff167f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e060405160405180910390a3806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505056fea165627a7a72305820b4e198b73a2c959a9c19b02fa868dddd97cfb1509825ece53f73d6cc8c7b3fc70029",
@@ -147,7 +140,7 @@
         "id": 59,
         "nodeType": "ImportDirective",
         "scope": 103,
-        "sourceUnit": 1260,
+        "sourceUnit": 1265,
         "src": "25:63:1",
         "symbolAliases": [],
         "unitAlias": ""
@@ -161,10 +154,10 @@
               "id": 60,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 1259,
+              "referencedDeclaration": 1264,
               "src": "112:7:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$1259",
+                "typeIdentifier": "t_contract$_Ownable_$1264",
                 "typeString": "contract Ownable"
               }
             },
@@ -174,7 +167,7 @@
           }
         ],
         "contractDependencies": [
-          1259
+          1264
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -182,7 +175,7 @@
         "id": 102,
         "linearizedBaseContracts": [
           102,
-          1259
+          1264
         ],
         "name": "Registry",
         "nodeType": "ContractDefinition",
@@ -329,7 +322,7 @@
                           "name": "keccak256",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1769,
+                          "referencedDeclaration": 1774,
                           "src": "307:9:1",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
@@ -402,7 +395,7 @@
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 1193,
+                  "referencedDeclaration": 1198,
                   "src": "265:9:1",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -576,7 +569,7 @@
                         "name": "keccak256",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1769,
+                        "referencedDeclaration": 1774,
                         "src": "488:9:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
@@ -729,7 +722,7 @@
         "id": 59,
         "nodeType": "ImportDirective",
         "scope": 103,
-        "sourceUnit": 1260,
+        "sourceUnit": 1265,
         "src": "25:63:1",
         "symbolAliases": [],
         "unitAlias": ""
@@ -743,10 +736,10 @@
               "id": 60,
               "name": "Ownable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 1259,
+              "referencedDeclaration": 1264,
               "src": "112:7:1",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Ownable_$1259",
+                "typeIdentifier": "t_contract$_Ownable_$1264",
                 "typeString": "contract Ownable"
               }
             },
@@ -756,7 +749,7 @@
           }
         ],
         "contractDependencies": [
-          1259
+          1264
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -764,7 +757,7 @@
         "id": 102,
         "linearizedBaseContracts": [
           102,
-          1259
+          1264
         ],
         "name": "Registry",
         "nodeType": "ContractDefinition",
@@ -911,7 +904,7 @@
                           "name": "keccak256",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 1769,
+                          "referencedDeclaration": 1774,
                           "src": "307:9:1",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
@@ -984,7 +977,7 @@
                   "name": "onlyOwner",
                   "nodeType": "Identifier",
                   "overloadedDeclarations": [],
-                  "referencedDeclaration": 1193,
+                  "referencedDeclaration": 1198,
                   "src": "265:9:1",
                   "typeDescriptions": {
                     "typeIdentifier": "t_modifier$__$",
@@ -1158,7 +1151,7 @@
                         "name": "keccak256",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1769,
+                        "referencedDeclaration": 1774,
                         "src": "488:9:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_function_keccak256_pure$_t_bytes_memory_ptr_$returns$_t_bytes32_$",
@@ -1316,7 +1309,7 @@
     }
   },
   "schemaVersion": "3.0.0",
-  "updatedAt": "2019-01-24T19:14:47.133Z",
+  "updatedAt": "2019-01-28T02:45:41.000Z",
   "devdoc": {
     "methods": {
       "isOwner()": {

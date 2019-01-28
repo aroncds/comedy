@@ -9,6 +9,7 @@ import {
   Menu,
   Icon,
   Tab,
+  Button,
   Message,
   Loader,
   Label } from 'semantic-ui-react';
@@ -128,6 +129,7 @@ class Sell extends Component {
 		this.web3 = context.drizzle.web3;
 
     this.onSell = this.onSell.bind(this);
+    this.handleUnits = this.handleUnits.bind(this);
   }
   
   getUnitsAllowed() {
@@ -151,12 +153,21 @@ class Sell extends Component {
   }
 
   isValid(){
+    var units = parseInt(this.state.units);
+    var approved = this.getUnitsAllowed();
 
+    if (units && units > 0 && approved >= units){
+      return true;
+    }
+
+    return false;
   }
 
 	onSell(){
+    var units = this.state.units;
+  
     if(this.isValid()){
-
+      this.store.methods.sell.cacheSend(units);
     }
 	}
 
@@ -197,6 +208,52 @@ const SellComponent = withNamespaces('translation')(drizzleConnect(Sell, state =
 	}
 }));
 
+class Withdraw extends Component {
+
+  constructor(props, context){
+    super(props);
+    this.store = context.drizzle.contracts.Store;
+    this.etherDataKey = this.store.methods.etherToPay.cacheCall(props.accounts[0]);
+    this.web3 = context.drizzle.web3;
+
+    this.handleWithdraw = this.handleWithdraw.bind(this);
+  }
+
+  handleWithdraw(){
+    var ethers = parseInt(this.getEtherToPay());
+
+    if (ethers > 0){
+      this.store.methods.withdraw.cacheSend();
+    }
+  }
+
+  getEtherToPay(){
+    if(this.props.Store.etherToPay[this.etherDataKey]){
+      return this.web3.utils.fromWei(this.props.Store.etherToPay[this.etherDataKey].value, "ether");
+    }
+
+    return 0;
+  }
+
+  render() {
+    return (
+      <div className="withdraw">
+        <Button onClick={this.handleWithdraw}>{this.getEtherToPay()}</Button>
+      </div>
+    );
+  }
+}
+
+Withdraw.contextTypes = { drizzle: object };
+
+const WithdrawComponent = withNamespaces("translation")(drizzleConnect(Withdraw, state => {
+  return {
+    Store: state.contracts.Store,
+    accounts: state.accounts,
+  }
+}));
+
+
 class Store extends Component {
   state = {open: false};
 
@@ -230,14 +287,15 @@ class Store extends Component {
   
     return [
       {menuItem: t("buy"), render: () => <Tab.Pane attached={true}><BuyComponent /></Tab.Pane>},
-      {menuItem: t("sell"), render: () => <Tab.Pane attached={false}><SellComponent /></Tab.Pane>}
+      {menuItem: t("sell"), render: () => <Tab.Pane attached={false}><SellComponent /></Tab.Pane>},
+      {menuItem: t("withdraw"), render: () => <Tab.Pane attached={false}><WithdrawComponent /></Tab.Pane>}
     ];
   }
 
   renderButton(){
     return (
       <Menu.Item onClick={this.handleOpen}>
-        <Icon name="bitcoin" /> <Label color="orange">{this.getBalance()}</Label>
+        <Icon name="bitcoin" /><Label color="orange">{this.getBalance()}</Label>
       </Menu.Item>
     )
   }
@@ -255,7 +313,7 @@ class Store extends Component {
         onClose={this.handleClose}>
           <Modal.Header>{t("store")}</Modal.Header>
           <Modal.Content>
-              <Tab menu={{secondary: true}} panes={this.getPanes()} />
+            <Tab menu={{secondary: true}} panes={this.getPanes()} />
           </Modal.Content>
       </Modal>
     )
