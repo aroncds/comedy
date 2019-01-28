@@ -9,7 +9,7 @@
     (def 'call-data 0x04)
     (def 'call-data1 0x24)
     (def 'call-data2 0x44)
-    (def 'call-result 0x00)
+    (def 'call-result 0x80)
 
     (def 'revert (revert 0 0))
 
@@ -42,6 +42,7 @@
         (mstore call-func (shl func 224))
         (mstore call-data arg1)
         (mstore call-data1 arg2)
+        (mstore call-result 0x0)
         (call allgas contract value call-func 0x44 call-result 0x20)
         (unless @call-result revert)
         @call-result
@@ -52,6 +53,7 @@
         (mstore call-data carg1)
         (mstore call-data1 carg2)
         (mstore call-data2 carg3)
+        (mstore call-result 0x0)
         (call allgas contract value call-func 0x64 call-result result-len)
         (unless @call-result revert)
         @call-result
@@ -62,6 +64,7 @@
         (mstore call-data sarg1)
         (mstore call-data1 sarg2)
         (mstore call-data2 sarg3)
+        (mstore call-result 0x0)
         (staticcall allgas contract call-func 0x64 call-result result-len)
         (unless @call-result revert)
         @call-result

@@ -47,16 +47,22 @@ contract('Joke', function(accounts){
         var data = await instance.joke(0);
         var amount = await token.balanceOf(accounts[1]);
 
-        assert.equal(data[3].toNumber(), 1, "check if like have been computate");
-        assert.equal(amount.toNumber(), 100, "check if token have been removed");
+        assert.equal(data[3].toNumber(), 1, "check if like was computate");
+        assert.equal(amount.toNumber(), 100, "check if token was removed");
     });
 
     it('should revert when it inst approved', async() => {
-        try{
+        
+        try {
             await instance.create("test", {from: accounts[1]});
             await instance.addLike(0, 100);
-            assert.equal(0,1, "no approved");
-        }catch(e){}
+
+            var data = await instance.joke(0);
+
+            assert.equal(data[3].toNumber(), 0, "no approved");
+        }catch(e){
+            assert.notEqual(e.message.indexOf("revert"), -1, "check if the contract was reverted");
+        }
     });
 
     it('should pause the contract', async () => {
