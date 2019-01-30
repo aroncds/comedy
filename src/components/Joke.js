@@ -18,7 +18,7 @@ import { handleTransactionUpdate } from '../util/transaction';
 
 
 class Like extends Component {
-  state = {open: false, units: ""};
+  state = {loading: false, error: false, units: ""};
 
   static propTypes = {
     joke: object.isRequired,
@@ -29,10 +29,19 @@ class Like extends Component {
     super(props);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleUnits = this.handleUnits.bind(this);
+    this.handleTransaction = this.handleTransaction.bind(this);
   }
 
   isValid(){
-    return testUnits(this.state);
+    var valid = testUnits(this.state);
+    this.setState({error: !valid});
+    return valid;
+  }
+
+  handleTransaction(state){
+    if(state === "success" || state === "error"){
+      this.setState({loading: false});
+    }
   }
 
   handleUnits(e){
@@ -44,20 +53,27 @@ class Like extends Component {
     const { joke, jokeId } = this.props;
 
     if(this.isValid()){
-      joke.methods.addLike.cacheSend(jokeId, units);
-      this.props.onClose();
+      this.setState({loading: true});
+      handleTransactionUpdate(
+        joke.methods.addLike.cacheSend(jokeId, units),
+        this.handleTransaction);
     }
   }
 
   render() {
     const { t } = this.props;
-    const { units } = this.state;
+    const { loading, units, error } = this.state;
+
+    if (loading){
+      return <Loader active/>
+    }
   
     return (
       <Form onSubmit={this.handleSubmit}>
         <Form.Input
           type="number"
           value={units}
+          error={error}
           onChange={this.handleUnits}
           action={{ color: 'teal', labelPosition: 'left', icon: 'like', content: t('send') }}
           placeholder={t("amount")} />
@@ -114,16 +130,18 @@ class Joke extends Component {
 
   renderContent(){
     if(!(this.dataKey && this.props.Joke.joke[this.dataKey])){
-      return <Segment><Loader active /></Segment>;
+      return <Loader active />;
     }
     
-    return [
-      <List.Header>{this.getOwner()}</List.Header>,
-      <List.Description>
-        {this.getBody()}<br /><br />
-        <Button onClick={this.handleLike} compact><Icon name="like"/> ({this.getLikes()})</Button>
-      </List.Description>
-    ];
+    return (
+      <div>
+        <List.Header>{this.getOwner()}</List.Header>
+        <List.Description>
+          {this.getBody()}<br /><br />
+          <Button onClick={this.handleLike} compact><Icon name="like"/> ({this.getLikes()})</Button>
+        </List.Description>
+      </div>
+    );
   }
 
   render() {
@@ -182,7 +200,7 @@ class JokeForm extends Component {
 
   handleStatus(status){
     console.log(status);
-    if (status == "success" || status == "error"){
+    if (status === "success" || status === "error"){
       this.setState({loading: false});
       return true;
     }

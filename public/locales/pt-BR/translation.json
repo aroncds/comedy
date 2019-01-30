@@ -1,6 +1,5 @@
 {
-    "You must type a number!": "Você deve digitar um número",
-    "You must buy more than the minium": "Você deve comprar um quantidade maior ou igual ao minimo",
+    "approve description": "Você precisa permitir está aplicaçao à usar alguns tokens para enviar curtidas e vende-los!",
     "buy": "Comprar",
     "sell": "Vender",
     "store": "Loja",

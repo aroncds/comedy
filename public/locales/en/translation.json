@@ -1,6 +1,5 @@
 {
-    "You must type a number!": "You must type a number!",
-    "You must buy more than the minium": "You must buy more than the minium",
+    "approve description": "You need let this application to use your tokens to send like or sell.",
     "sell": "Sell",
     "buy": "Buy",
     "store": "Store",

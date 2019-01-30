@@ -13,7 +13,7 @@ import { testUnits } from '../validators/forms';
 
 
 class TokenApprove extends Component {
-  state = {open:false, units: 0};
+  state = {open:false, error: false, units: 0};
 
   constructor(props, context) {
     super(props);
@@ -38,7 +38,9 @@ class TokenApprove extends Component {
   }
 
   isValid() {
-    return testUnits(this.state);
+    var valid = testUnits(this.state);
+    this.setState({error: !valid});
+    return valid;
   }
 
   handleOpen(){
@@ -73,7 +75,7 @@ class TokenApprove extends Component {
 
   render(){
     const { t } = this.props;
-    const { open, units } = this.state;
+    const { open, error, units } = this.state;
   
     return (
       <Modal
@@ -85,6 +87,7 @@ class TokenApprove extends Component {
           trigger={this.renderButton()}>
         <Modal.Header>{t("approve")}</Modal.Header>
         <Modal.Content>
+          <p>{t('approve description')}</p>
           <Form onSubmit={this.handleApprove}>
             <Form.Input 
               fluid
@@ -92,6 +95,7 @@ class TokenApprove extends Component {
               type="number"
               placeholder={t("amount")}
               onChange={this.handleUnits}
+              error={error}
               value={units}/>
           </Form>
         </Modal.Content>

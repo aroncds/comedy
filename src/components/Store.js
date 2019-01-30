@@ -5,12 +5,10 @@ import { drizzleConnect } from 'drizzle-react';
 import {
   Modal,
   Form,
-  Input,
   Menu,
   Icon,
   Tab,
   Button,
-  Message,
   Loader,
   Label } from 'semantic-ui-react';
 
@@ -33,9 +31,31 @@ class Buy extends Component {
     this.handleUnits = this.handleUnits.bind(this);
   }
 
+  getTotal(){
+    const { Store } = this.props;
+  
+    var price = 0;
+    var total = 0;
+    var units = parseInt(this.state.units);
+    units = units ? units:0;
+
+    if(Store.buyPrice[this.buyPriceDataKey]){
+      price = Store.buyPrice[this.buyPriceDataKey].value;
+    }
+
+    total = this.web3.utils.toBN(price * units);
+    return this.web3.utils.fromWei(total, "ether");
+  }
+
   getPrice(){
-    var price = this.props.Store.buyPrice[this.buyPriceDataKey].value;
-    return this.web3.utils.fromWei(price, "ether");
+    const { Store } = this.props;
+    var price = 0;
+
+    if(Store.buyPrice[this.buyPriceDataKey]){
+      price = Store.buyPrice[this.buyPriceDataKey].value;
+    }
+
+    return this.web3.utils.fromWei(price.toString(), "ether");;
   }
 
   getMin() {
@@ -47,30 +67,23 @@ class Buy extends Component {
   }
 
   isValid(){
-    var error = testUnits(this.state);
-    this.setState({error: error});
-    return error;
+    var valid = testUnits(this.state);
+    this.setState({error: !valid});
+    return valid;
   }
 
   onBuy(){
     if(this.isValid()){
-      var price = parseFloat(this.getPrice());
-      var units = parseFloat(this.state.units);
-      var value = this.web3.utils.toWei((units * price).toString(), "ether");
+      var total = this.getTotal();
+      var value = this.web3.utils.toWei(total, "ether");
+  
       this.store.methods.buy.cacheSend({value: value});
-      this.setState({units:""});
     }
-  }
-
-  renderError() {
-      if (this.state.error) {
-          return <Message error content={this.state.error}/>
-      }
-      return null;
   }
 
   render() {
     const { t } = this.props;
+    const { units, error } = this.state;
 
     if (!(this.props.Store.buyPrice[this.buyPriceDataKey] && this.props.Store.buyMin[this.buyMinDataKey])){
       return <Loader active/>
@@ -78,17 +91,16 @@ class Buy extends Component {
 
     return (
       <Form onSubmit={this.onBuy}>
-        <Input
+        <Form.Input
           fluid
           action={{ color: 'teal', labelPosition: 'left', icon: 'cart', content: t('buy') }}
+          error={error}
+          value={units}
           type="number"
           placeholder={t("amount")}
-          error={this.state.error}
-          onChange={this.handleUnits}
-          value={this.state.units} />
-        {this.renderError()}
-        <p><strong>Total:</strong> 100 ETH</p>
-        <p>{t('price')}: {this.getPrice()} - Min: {this.getMin()}</p>
+          onChange={this.handleUnits} />
+        <p><strong>{t('price')}</strong>: {this.getPrice()} - <strong>Min</strong>: {this.getMin()}</p>
+        <p><strong>Total:</strong> {this.getTotal()} ETH</p>
       </Form>
     )
   }
@@ -106,7 +118,7 @@ const BuyComponent = withNamespaces('translation')(drizzleConnect(Buy, state => 
 }));
 
 class Sell extends Component {
-	state = {units:0, error:null};
+	state = {units:0, error:false};
 
 	constructor(props, context) {
 		super(props);
@@ -131,13 +143,28 @@ class Sell extends Component {
     return 0;
   }
 
+  getTotal(){
+    var price = 0;
+    var units = parseInt(this.state.units);
+    if (this.props.Store.sellPrice[this.sellPriceDataKey]){
+      price = this.props.Store.sellPrice[this.sellPriceDataKey].value; 
+    }
+    return this.web3.utils.fromWei((price * units).toString(), "ether");;
+  }
+
   getPrice(){
-    var price = this.props.Store.sellPrice[this.sellPriceDataKey].value;
-    return this.web3.utils.fromWei(price, "ether");
+    var price = 0;
+    if (this.props.Store.sellPrice[this.sellPriceDataKey]){
+      price = this.props.Store.sellPrice[this.sellPriceDataKey].value; 
+    }
+    return this.web3.utils.fromWei(price.toString(), "ether");;
   }
 
   getMin() {
-    return this.props.Store.sellMin[this.sellMinDataKey].value;
+    if(this.props.Store.sellMin[this.sellMinDataKey]){
+      return this.props.Store.sellMin[this.sellMinDataKey].value;
+    }
+    return 0;
   }
 
   handleUnits(e){
@@ -146,7 +173,9 @@ class Sell extends Component {
 
   isValid(){
     var approved = this.getUnitsAllowed();
-    return testUnits(this.state, (units) => approved >= units);
+    var valid = testUnits(this.state, (units) => approved >= units);
+    this.setState({ error: !valid });
+    return valid;
   }
 
 	onSell(){
@@ -167,8 +196,8 @@ class Sell extends Component {
 
     return (
       <Form onSubmit={this.onSell}>
-        <div>{t("you have")} ({this.getUnitsAllowed()}) {t("usable")}</div>
-        <Input
+        <p>{t("you have")} (<strong>{this.getUnitsAllowed()}</strong>) {t("usable")}!</p>
+        <Form.Input
           fluid
           action={{ color: 'teal', labelPosition: 'left', icon: 'cart', content: t('sell') }}
           type="number"
@@ -177,6 +206,7 @@ class Sell extends Component {
           onChange={this.handleUnits}
           value={units} />
         <p><strong>{t('price')}</strong>: {this.getPrice()} - <strong>Min</strong>: {this.getMin()}</p>
+        <p><strong>Total</strong>: {this.getTotal()}</p>
       </Form>
     )
   }
@@ -206,9 +236,9 @@ class Withdraw extends Component {
   }
 
   handleWithdraw(){
-    var ethers = parseInt(this.getEtherToPay());
+    var ethers = parseFloat(this.getEtherToPay());
 
-    if (ethers > 0){
+    if (parseFloat(ethers) > 0){
       this.store.methods.withdraw.cacheSend();
     }
   }
