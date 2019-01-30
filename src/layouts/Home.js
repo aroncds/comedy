@@ -11,9 +11,9 @@ export default class Home extends Component {
         return (
             <Container fluid>
                 <Menu icon>
-                    <Menu.Item><Icon name="podcast"/></Menu.Item>
-                    <ApproveComponent key={1}/>
-                    <Store key={2}/>
+                    <Menu.Item key={1}><Icon name="podcast"/></Menu.Item>
+                    <ApproveComponent key={2}/>
+                    <Store key={3}/>
                 </Menu>
                 <JokeFormContainer />
                 <JokeListContainer />

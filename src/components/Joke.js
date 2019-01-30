@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { object, number } from "prop-types";
 import { drizzleConnect } from 'drizzle-react';
 import { withNamespaces } from 'react-i18next';
-import { reverse } from '../util/arrays';
 import {
   Segment,
   Form,
@@ -12,6 +11,10 @@ import {
   Button,
   Icon,
   Transition } from 'semantic-ui-react';
+
+import { reverse } from '../util/arrays';
+import { testUnits } from '../validators/forms';
+import { handleTransactionUpdate } from '../util/transaction';
 
 
 class Like extends Component {
@@ -29,13 +32,7 @@ class Like extends Component {
   }
 
   isValid(){
-    var units = parseInt(this.state.units);
-
-    if(units && units > 0){
-      return true;
-    }
-
-    return false;
+    return testUnits(this.state);
   }
 
   handleUnits(e){
@@ -123,8 +120,7 @@ class Joke extends Component {
     return [
       <List.Header>{this.getOwner()}</List.Header>,
       <List.Description>
-        {this.getBody()}
-        <br /><br />
+        {this.getBody()}<br /><br />
         <Button onClick={this.handleLike} compact><Icon name="like"/> ({this.getLikes()})</Button>
       </List.Description>
     ];
@@ -169,7 +165,7 @@ class JokeForm extends Component {
 
   constructor(props, context){
     super(props);
-    this.contract = context.drizzle.contracts.Joke;
+    this.joke = context.drizzle.contracts.Joke;
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleBody = this.handleBody.bind(this);
     this.handleStatus = this.handleStatus.bind(this);
@@ -184,29 +180,24 @@ class JokeForm extends Component {
     return false;
   }
 
-  handleStatus(){
-    const { transactionStack, transactions } = this.props;
-  
-    if (this.stackId != undefined){
-      var transaction = transactionStack[this.stackId];
-      if (transaction && transaction.length){
-        var status = transactions[transaction].status;
-
-        if (status == "success" || status == "error"){
-          this.setState({loading: false});
-          return;
-        }
-      }
+  handleStatus(status){
+    console.log(status);
+    if (status == "success" || status == "error"){
+      this.setState({loading: false});
+      return true;
     }
-
-    setTimeout(this.handleStatus, 1000);
+    return false;
   }
 
   handleSubmit() {
+    const { body } = this.state;
+  
     if (this.isValid()){
-      this.stackId = this.contract.methods.create.cacheSend(this.state.body);
-      this.handleStatus();
       this.setState({loading:true});
+
+      handleTransactionUpdate(
+        this.joke.methods.create.cacheSend(body),
+        this.handleStatus);
     }
   }
 

@@ -14,6 +14,8 @@ import {
   Loader,
   Label } from 'semantic-ui-react';
 
+import { testUnits } from '../validators/forms';
+
 
 class Buy extends Component {
   state = {units:"", error: null};
@@ -45,19 +47,9 @@ class Buy extends Component {
   }
 
   isValid(){
-    const { t } = this.props;
-    var error = null;
-    var units = parseInt(this.state.units);
-    if (!units || units <= 0) {
-      error = t("You must type a number!");
-    } else if (this.getMin() > units){
-      error = t("You must buy more than the minium");
-    }
-    if (error){
-      this.setState({error: error});
-      return false;
-    }
-    return true;
+    var error = testUnits(this.state);
+    this.setState({error: error});
+    return error;
   }
 
   onBuy(){
@@ -153,14 +145,8 @@ class Sell extends Component {
   }
 
   isValid(){
-    var units = parseInt(this.state.units);
     var approved = this.getUnitsAllowed();
-
-    if (units && units > 0 && approved >= units){
-      return true;
-    }
-
-    return false;
+    return testUnits(this.state, (units) => approved >= units);
   }
 
 	onSell(){

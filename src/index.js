@@ -1,18 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { DrizzleProvider } from 'drizzle-react'
+import DrizzleProvider from './util/components/DrizzleProvide';
 
 import App from './App'
 import { LoadingContainer } from 'drizzle-react-components'
 
-import { store } from './store'
-import drizzleOptions from './drizzleOptions'
+import drizzle from './drizzle'
 
 import './i18n'
 
 ReactDOM.render((
-    <DrizzleProvider options={drizzleOptions} store={store}>
-      <LoadingContainer><App /></LoadingContainer>
+    <DrizzleProvider drizzle={drizzle}>
+      <LoadingContainer>
+        <App />
+      </LoadingContainer>
     </DrizzleProvider>
   ),
   document.getElementById('root')

@@ -9,6 +9,8 @@ import {
   Icon,
   Label } from 'semantic-ui-react';
 
+import { testUnits } from '../validators/forms';
+
 
 class TokenApprove extends Component {
   state = {open:false, units: 0};
@@ -36,11 +38,7 @@ class TokenApprove extends Component {
   }
 
   isValid() {
-    var units = parseInt(this.state.units);
-    if (units && units > 0){
-      return true;
-    }
-    return false;
+    return testUnits(this.state);
   }
 
   handleOpen(){
