@@ -62,7 +62,6 @@ class TokenApprove extends Component {
   }
 
   renderButton(){
-    const { t } = this.props;
     return (
       <Menu.Item
         color="green"

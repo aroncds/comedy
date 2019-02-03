@@ -36,7 +36,7 @@ class Buy extends Component {
   
     var price = 0;
     var total = 0;
-    var units = parseInt(this.state.units);
+    var units = parseInt(this.state.units, 10);
     units = units ? units:0;
 
     if(Store.buyPrice[this.buyPriceDataKey]){
@@ -145,7 +145,7 @@ class Sell extends Component {
 
   getTotal(){
     var price = 0;
-    var units = parseInt(this.state.units);
+    var units = parseInt(this.state.units, 10);
     if (this.props.Store.sellPrice[this.sellPriceDataKey]){
       price = this.props.Store.sellPrice[this.sellPriceDataKey].value; 
     }

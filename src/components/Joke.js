@@ -101,22 +101,22 @@ class Joke extends Component {
   }
 
   getLikes(){
-    var data = this.props.Joke.joke[this.dataKey].value;
+    let data = this.props.Joke.joke[this.dataKey].value;
     return data[3];
   }
 
   getBody() {
-    var data = this.props.Joke.joke[this.dataKey].value;
+    let data = this.props.Joke.joke[this.dataKey].value;
     return data[5];
   }
 
   getDate(){
-    var data = this.props.Joke.joke[this.dataKey].value;
-    return (new Date(parseInt(data[2]))).toString();
+    let data = this.props.Joke.joke[this.dataKey].value;
+    return (new Date(parseInt(data[2], 10))).toString();
   }
 
   getOwner(){
-    var data = this.props.Joke.joke[this.dataKey].value;
+    let data = this.props.Joke.joke[this.dataKey].value;
     return data[4];
   }
 
@@ -199,7 +199,6 @@ class JokeForm extends Component {
   }
 
   handleStatus(status){
-    console.log(status);
     if (status === "success" || status === "error"){
       this.setState({loading: false});
       return true;
@@ -268,7 +267,7 @@ class JokeList extends Component {
       return <Loader active/>
     }
 
-    var length = parseInt(this.props.Joke.length[this.dataKey].value);
+    var length = parseInt(this.props.Joke.length[this.dataKey].value, 10);
 
     return (
       <Transition.Group
