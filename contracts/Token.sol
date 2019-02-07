@@ -16,6 +16,6 @@ contract Token is ERC20 {
     }
 
     function() external {
-        revert();
+        revert("no-payable");
     }
 }

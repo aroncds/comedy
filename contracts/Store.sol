@@ -8,6 +8,11 @@ import "./library/AddressUtils.sol";
 import "./interfaces/IRegistry.sol";
 import "./interfaces/IWallet.sol";
 
+/**
+ * @title Store
+ * @dev Buy and sell tokens
+ */
+
 
 contract Store is Ownable {
     using SafeMath for uint256;
@@ -48,6 +53,67 @@ contract Store is Ownable {
         registry = _registry;
     }
 
+    function () external {
+        revert("no-payable");
+    }
+
+    /**
+     * @dev Transfer tokens to sender depeding of the value sent.
+     */
+    function buy()
+        public
+        payable
+        whenNotPaused
+        returns(bool)
+    {
+        uint256 units = uint(msg.value).div(buyPrice);
+        address _registry = registry;
+        address payable wallet = IRegistry(_registry).getContract("wallet").toPayable();
+        IERC20 token = IERC20(IRegistry(_registry).getContract("token"));
+
+        require(units >= buyMin, "min-units");
+        require(token.balanceOf(wallet) >= units, "token-min-units");
+        require(token.transferFrom(wallet, msg.sender, units), "no-transfered");
+
+        wallet.transfer(msg.value);
+
+        emit OnBuy(msg.sender, units);
+        return true;
+    }
+
+    function sell(uint256 units)
+        public
+        whenNotPaused
+        returns(bool)
+    {
+        address wallet = IRegistry(registry).getContract("wallet");
+        require(IWallet(wallet).captureTokens(msg.sender, units), "capture-failed");
+
+        etherToPay[msg.sender] += sellPrice.mul(units);
+
+        emit OnSell(msg.sender, etherToPay[msg.sender]);
+        return true;
+    }
+
+    /**
+     * @dev Give ethers disponible to sender after of the sell.
+     */
+    function withdraw()
+        public
+        whenNotPaused
+        returns(bool)
+    {
+        address wallet = IRegistry(registry).getContract("wallet");
+        uint256 ethers = etherToPay[msg.sender];
+        etherToPay[msg.sender] = 0;
+
+        require(wallet.balance >= ethers, "balance-down");
+        require(IWallet(wallet).sendEther(msg.sender, ethers), "send-failed");
+
+        emit OnWithdraw(msg.sender, ethers);
+        
+        return true;
+    }
 
     function setBuy(uint256 min, uint256 value)
         public
@@ -74,62 +140,5 @@ contract Store is Ownable {
         onlyOwner
     {
         paused = value;
-    }
-
-    function buy()
-        public
-        payable
-        whenNotPaused
-        returns(bool)
-    {
-        uint256 units = uint(msg.value).div(buyPrice);
-        address _registry = registry;
-        address payable wallet = IRegistry(_registry).getContract("wallet").toPayable();
-        IERC20 token = IERC20(IRegistry(_registry).getContract("token"));
-
-        require(units >= buyMin, "min-units");
-        require(token.balanceOf(wallet) >= units, "token-min-units");
-        require(token.transferFrom(wallet, msg.sender, units), "no-transfered");
-        
-        wallet.transfer(msg.value);
-        
-        emit OnBuy(msg.sender, units);
-        return true;
-    }
-
-    function sell(uint256 units)
-        public
-        whenNotPaused
-        returns(bool)
-    {
-        address wallet = IRegistry(registry).getContract("wallet");
-        require(IWallet(wallet)
-            .captureTokens(msg.sender, units), "capture-failed");
-
-        etherToPay[msg.sender] += sellPrice.mul(units);
-
-        emit OnSell(msg.sender, etherToPay[msg.sender]);
-        return true;
-    }
-
-    function withdraw()
-        public
-        whenNotPaused
-        returns(bool)
-    {
-        address wallet = IRegistry(registry).getContract("wallet");
-        uint256 ethers = etherToPay[msg.sender];
-        etherToPay[msg.sender] = 0;
-
-        require(wallet.balance >= ethers, "balance-down");
-        require(IWallet(wallet).sendEther(msg.sender, ethers), "send-failed");
-
-        emit OnWithdraw(msg.sender, ethers);
-        
-        return true;
-    }
-
-    function () external {
-        revert();
     }
 }
