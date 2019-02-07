@@ -11,5 +11,8 @@
     "usable": "usable",
     "approve": "Approve",
     "withdraw": "Withdraw",
-    "send": "Send"
+    "send": "Send",
+    "edit": "Edit",
+    "create": "Create",
+    "anonym": "Anonymous"
 }
