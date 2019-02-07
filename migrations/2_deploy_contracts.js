@@ -6,27 +6,15 @@ var Registry = artifacts.require("Registry");
 
 
 module.exports = async (deployer) => {
-  var registry, token, wallet, store, joke;
+  var registry;
 
   await deployer.deploy(Registry);
   registry = await Registry.deployed();
 
-  await deployer.deploy(Token);
-  token = await Token.deployed();
-  await registry.register("token", token.address);
-
-  await deployer.deploy(Wallet, registry.address);
-  wallet = await Wallet.deployed();
-  await registry.register("wallet", wallet.address);
-
-  await deployer.deploy(Store, registry.address);
-  store = await Store.deployed();
-  await registry.register("store", store.address);
-
-  await deployer.deploy(Joke, registry.address);
-  joke = await Joke.deployed();
-
-  await token.transfer(wallet.address, await token.INITIAL_SUPPLY());
-  await wallet.approve(store.address);
-  await wallet.approve(joke.address);
+  await Promise.all([
+    deployer.deploy(Token),
+    deployer.deploy(Wallet, registry.address),
+    deployer.deploy(Store, registry.address),
+    deployer.deploy(Joke, registry.address),
+  ]);
 };
